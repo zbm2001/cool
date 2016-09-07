@@ -1,3 +1,5 @@
+import $ from '../lib/jquery/jquery';
+
 /**
      * 封装 jQuery.ajax 创建一个方法，统一预置参数和事件预处理
      * @param  {object} preOptions 预置的参数选项
@@ -5,7 +7,7 @@
      * @param  {function} presetOptions 预设的参数处理函数
      * @return {object} 返回jquery的类Promise对象
      */
-    presetAjax(preOptions, preHandleEvents, presetOptions) {
+export default presetAjax(preOptions, preHandleEvents, presetOptions) {
 
       preOptions = $.extend({}, preOptions);
       preHandleEvents = $.extend({}, preHandleEvents);
