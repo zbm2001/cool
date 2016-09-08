@@ -1,44 +1,68 @@
 import $ from '../lib/jquery/jquery';
 
 /**
-     * 封装 jQuery.ajax 创建一个方法，统一预置参数和事件预处理
-     * @param  {object} preOptions 预置的参数选项
-     * @param  {object} preHandleEvents 预设的事件处理函数hash集
-     * @param  {function} presetOptions 预设的参数处理函数
-     * @return {object} 返回jquery的类Promise对象
-     */
+ * 创建一个预置参数和事件预处理的ajax方法
+ * 基于 jQuery.ajax 封装
+ * @param  {object} preOptions 预置的参数选项
+ * @param  {object} preHandleEvents 预设的事件处理函数hash集
+ * @param  {function} presetOptions 预设的参数处理函数
+ * @return {object} 返回jquery的类Promise对象
+ */
 export default presetAjax(preOptions, preHandleEvents, presetOptions) {
 
-      preOptions = $.extend({}, preOptions);
-      preHandleEvents = $.extend({}, preHandleEvents);
+  preOptions = $.extend(true, {}, preOptions);
+  preHandleEvents = $.extend({}, preHandleEvents);
 
-      function ajax(options) {
+  return function ajax(options) {
 
-        var newOptions = $.extend({}, preOptions, options),
-          results = {};
+    var newOptions = $.extend({}, preOptions, options),
+      $ajax,
+      $ajaxThen,
+      results = {};
 
-        presetOptions && presetOptions(newOptions);
+    presetOptions && presetOptions(newOptions);
 
-        ['success', 'beforeSend', 'error', 'complete']
-        .forEach(name => options[name] && (newOptions[name] = bindHandleEvent(preHandleEvents[name], options[name]));
-
-        return $.ajax(newOptions).then(function(res) {
-          // jquery对原生Promise返回对象不可直接使用
-          //return results.success !== false ? res : Promise.reject(res);
-          return results.success !== false ? res : $.Deferred().reject(res);
-        });
-
-        function bindHandleEvent(preHandleEvent, handleEvent) {
-          return function() {
-            if (preHandleEvent) {
-              results[name] = preHandleEvent.apply(this, arguments);
-            }
-            if (results[name] !== false) {
-              return handleEvent.apply(this, arguments);
-            }
-          }
+    ['success', 'beforeSend', 'error', 'complete'].forEach(function(name) {
+      newOptions[name] = this(name, preHandleEvents[name], options[name]);
+    }, function(name, preHandleEvent, handleEvent) {
+      return function() {
+        if (preHandleEvent) {
+          results[name] = preHandleEvent.apply(this, arguments);
+        }
+        if (handleEvent && results[name] !== false) {
+          return handleEvent.apply(this, arguments);
         }
       }
+    });
 
-      return ajax;
+    $ajax = $.ajax(newOptions);
+    $ajaxThen = $ajax.then(function(res) {
+      // 只覆盖属性
+      extendBind($ajaxThen, $ajax, true);
+      // jquery对原生Promise返回对象不可直接使用
+      // return results.success !== false ? res : Promise.reject(res);
+      return results.success !== false ? res : $.Deferred().reject(res);
+    });
+
+    return extendBind($ajaxThen, $ajax, false);
+
+    // 将原 jQuery ajax 对象的绑定方法和属性，附加到then出的目标对象上
+    // 被附加的绑定方法执行时，scope依然为原对象
+    function extendBind(target, source, nofn) {
+      $.each(source, function(k, v) {
+        if (nofn || !(k in target)) {
+          if (typeof v !== 'function') {
+            target[k] = v;
+          } else if (!nofn) {
+            target[k] = function(v) {
+              return function() {
+                v.apply(source, arguments);
+              }
+            }(v);
+          }
+        }
+      });
+      return target;
     }
+  }
+}
