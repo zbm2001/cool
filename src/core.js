@@ -7,7 +7,9 @@ import $ from '../lib/jquery/jquery';
 import presetAjax from './presetAjax';
 import ancestor from './ancestor';
 import ancestorAll from './ancestorAll';
-import coord from './coord';
+import iiancestor from './iiancestor';
+import iiancestorAll from './iiancestorAll';
+import rectCoord from './rectCoord';
 import replaceClass from './replaceClass';
 import switchClass from './switchClass';
 
@@ -16,6 +18,8 @@ Object.assign($, {
     presetAjax,
     ancestor,
     ancestorAll,
+    iiancestor,
+    iiancestorAll,
     coord,
     replaceClass,
     swapClass

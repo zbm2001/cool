@@ -36,16 +36,20 @@ export default presetAjax(preOptions, preHandleEvents, presetOptions) {
     });
 
     $ajax = $.ajax(newOptions);
+
+    // 这里是为解决某些虽然请求success，但可能业务失败的预处理场景
     $ajaxThen = $ajax.then(function(res) {
       // 只覆盖属性
       extendBind($ajaxThen, $ajax, true);
-      // jquery对原生Promise返回对象不可直接使用
+      // jquery对原生Promise对象不可直接使用返回
       // return results.success !== false ? res : Promise.reject(res);
+      // 调整为jquery模拟接口的Deferred对象
       return results.success !== false ? res : $.Deferred().reject(res);
     });
 
     return extendBind($ajaxThen, $ajax, false);
 
+    // 让return出的对象保持abort可用
     // 将原 jQuery ajax 对象的绑定方法和属性，附加到then出的目标对象上
     // 被附加的绑定方法执行时，scope依然为原对象
     function extendBind(target, source, nofn) {
