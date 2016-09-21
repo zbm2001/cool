@@ -3,10 +3,10 @@ import $ from '../lib/jquery/jquery';
 /**
  * 创建一个预置参数和事件预处理的ajax方法
  * 基于 jQuery.ajax 封装
- * @param  {object} preOptions 预置的参数选项
- * @param  {object} preHandleEvents 预设的事件处理函数hash集
- * @param  {function} presetOptions 预设的参数处理函数
- * @return {object} 返回jquery的类Promise对象
+ * @param  {Object} preOptions 预置的参数选项
+ * @param  {Object} preHandleEvents 预设的事件处理函数hash集
+ * @param  {Function} presetOptions 预设的参数处理函数，参数会被传入
+ * @return {Object} 返回jquery的类Promise对象
  */
 export default presetAjax(preOptions, preHandleEvents, presetOptions) {
 

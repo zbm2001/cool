@@ -1,6 +1,6 @@
 import './util/assign';
-import typeOf from './util/typeOf';
-import create from './util/create';
+// import typeOf from './util/typeOf';
+// import create from './util/create';
 
 import $ from '../lib/jquery/jquery';
 
@@ -10,8 +10,9 @@ import ancestorAll from './ancestorAll';
 import iiancestor from './iiancestor';
 import iiancestorAll from './iiancestorAll';
 import rectCoord from './rectCoord';
+import regClass from './regClass';
 import replaceClass from './replaceClass';
-import switchClass from './switchClass';
+import swapClass from './swapClass';
 
 Object.assign($, {
 
@@ -20,7 +21,8 @@ Object.assign($, {
     ancestorAll,
     iiancestor,
     iiancestorAll,
-    coord,
+    rectCoord,
+    regClass,
     replaceClass,
     swapClass
 

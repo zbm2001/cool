@@ -1,10 +1,8 @@
-import $ from '../lib/jquery/jquery';
-
 /**
  * 获取元素在页面中的矩形坐标
  * 
- * @param  {object} elem DOM元素
- * @return {object} 返回元素各个边的相对于页面的坐标及尺寸
+ * @param  {HTMLElement} elem DOM元素
+ * @return {Object} 返回元素各个边的相对于页面的坐标及尺寸
  */
 export default rectCoord(elem) {
     
