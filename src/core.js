@@ -11,6 +11,10 @@ import iiancestor from './iiancestor';
 import iiancestorAll from './iiancestorAll';
 import rectCoord from './rectCoord';
 import regClass from './regClass';
+import hasClass from './hasClass';
+import addClass from './addClass';
+import removeClass from './removeClass';
+import toggleClass from './toggleClass';
 import replaceClass from './replaceClass';
 import swapClass from './swapClass';
 
@@ -23,6 +27,10 @@ Object.assign($, {
     iiancestorAll,
     rectCoord,
     regClass,
+    hasClass,
+    addClass,
+    removeClass,
+    toggleClass,
     replaceClass,
     swapClass
 
