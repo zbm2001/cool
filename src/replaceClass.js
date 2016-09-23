@@ -11,15 +11,17 @@ import typeOf from './typeOf';
  * @return {Boolean} 返回结果表明是否实际替换了样式类
  */
 export default replaceClass(elem, beReplacedClass, replacedClass, whether) {
+  var cssClass, newClass, isString;
   // 若没有指定样式类
-  if (!beReplacedClass || (typeof beReplacedClass === 'string' ? !(beReplacedClass = beReplacedClass.trim()) : typeOf(beReplacedClass) !== 'RegExp')) {
+  if(!replacedClass || typeof replacedClass !== 'string'){
     return false;
   }
-  var cssClass = elem.className,
-    newClass;
+  if (!beReplacedClass || ((isString = typeof beReplacedClass === 'string') ? !(beReplacedClass = beReplacedClass.trim()) : typeOf(beReplacedClass) !== 'RegExp')) {
+    return false;
+  }
 
-  if (cssClass && (cssClass = cssClass.trim())) {
-    if (typeof beReplacedClass === 'string') {
+  if ((cssClass = elem.className) && (cssClass = cssClass.trim())) {
+    if (isString) {
       if (cssClass === beReplacedClass) {
         elem.className = replacedClass;
         return true;

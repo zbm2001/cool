@@ -12,17 +12,16 @@ import regClass from './regClass';
  *   返回 -1 逆序前一个替换了后一个的样式类
  */
 export default swapClass(elem, cssClass1, cssClass2) {
+  var cssClass, newClass;
   // 若没有指定样式类
-  if (!(cssClass1 && typeof cssClass1 === 'string' && (cssClass1 = cssClass1.trim()))) {
+  if (!cssClass1 || typeof cssClass1 !== 'string' || !(cssClass1 = cssClass1.trim())) {
     return 0;
   }
-  if (!(cssClass2 && typeof cssClass2 === 'string' && (cssClass2 = cssClass2.trim()))) {
+  if (!cssClass2 || typeof cssClass2 !== 'string' || !(cssClass2 = cssClass2.trim())) {
     return 0;
   }
-  var cssClass = elem.className,
-    newClass;
 
-  if (cssClass && (cssClass = cssClass.trim())) {
+  if ((cssClass = elem.className) && (cssClass = cssClass.trim())) {
     if (cssClass === cssClass1) {
       elem.className = cssClass2;
       return 1;
