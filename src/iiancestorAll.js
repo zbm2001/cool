@@ -1,6 +1,7 @@
 import ancestorAll from './ancestorAll';
 /**
  * 从一个元素自身算起，向上检索所有匹配的祖先元素
+ *     include itself ancestor all
  * 
  * @param  {HTMLElement} elem 开始查找的元素
  * @param  {String} selector 匹配的选择器

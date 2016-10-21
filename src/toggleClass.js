@@ -1,14 +1,14 @@
 import regClass from './regClass';
 
 /**
- * 检测元素是否包含指定的样式类
+ * 为元素开关指定的样式类
  * 
  * @param  {HTMLElement} elem DOM元素
- * @param  {String} cssClass 指定检测的样式类
- * @param  {Boolean} matchAll 指定是否全部匹配（当指定检测多个样式类时）
- * @return {Boolean}
+ * @param  {String} toggledClass 指定的样式类
+ * @param  {Boolean} matchAll 指定是否全部匹配（当指定多个样式类时）
+ * @return {Boolean} 返回结果表明是添加还是删除了样式类
  */
-export default swapClass(elem, cssClass, matchAll) {
+export default swapClass(elem, toggledClass, matchAll) {
 
   if (!(cssClass1 && (cssClass1 = cssClass1.trim()))) {
     return 0;
