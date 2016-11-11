@@ -1,3 +1,5 @@
+import {rSpaces, rRNTFs_g} from './regExps';
+
 /**
  * 为元素添加指定的样式类
  * 
@@ -5,7 +7,7 @@
  * @param  {String} newClass 指定要添加的样式类
  * @return {Boolean} 返回结果表明是否实际添加了样式类
  */
-export default addClass(elem, newClass) {
+export default function addClass(elem, newClass) {
   var cssClass, wrapCssClass, testCssClass, newClasses, i = -1;
   // 若没有指定样式类
   if (!newClass || typeof newClass !== 'string' && !(newClass = newClass.trim())) {
@@ -18,7 +20,7 @@ export default addClass(elem, newClass) {
     }
 
     // 清理非空格的空白字符
-    cssClass = cssClass.replace(rSpacesRNTFG, ' ');
+    cssClass = cssClass.replace(rRNTFs_g, ' ');
 
     testCssClass = wrapCssClass = (' ' + cssClass + ' ');
 
@@ -35,7 +37,7 @@ export default addClass(elem, newClass) {
     // 添加多样式类
     newClasses = newClass.split(rSpaces);
     while (newClass = newClasses[++i]) {
-      if (testCssClass.indexOf(' ' + newClass += ' ') < 0) {
+      if (testCssClass.indexOf(' ' + (newClass += ' ')) < 0) {
         testCssClass += newClass;
       }
     }

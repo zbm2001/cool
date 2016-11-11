@@ -1,6 +1,8 @@
+import {rSpace} from './regExps';
 import regClass from './regClass';
+import typeOf from './util/typeOf';
 
-var rSpace = /\s/;
+
 /**
  * 为元素删除指定的样式类
  * 
@@ -8,7 +10,7 @@ var rSpace = /\s/;
  * @param  {String|RegExp} removedClass 指定要删除的样式类。若不是非空字符串或正则，直接清空元素全部样式
  * @return {Boolean} 返回结果表明是否实际删除了样式类
  */
-export default removeClass(elem, removedClass) {
+export default function removeClass(elem, removedClass) {
   var cssClass, newClass, isRegExp;
   // 若没有指定样式类
   if (!removedClass || (typeof removedClass === 'string' ? !(removedClass = removedClass.trim()) : !(isRegExp = typeOf(beReplacedClass) === 'RegExp'))) {

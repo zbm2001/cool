@@ -6,40 +6,35 @@ import regClass from './regClass';
  * @param  {HTMLElement} elem DOM元素
  * @param  {String} toggledClass 指定的样式类
  * @param  {Boolean} matchAll 指定是否全部匹配（当指定多个样式类时）
- * @return {Boolean} 返回结果表明是添加还是删除了样式类
+ * @return {Number} range{-1,1} 返回结果标识码，表明实际是添加还是删除了样式类
+ *   返回  1 添加了样式类
+ *   返回  0 未做任何操作
+ *   返回 -1 删除了样式类
  */
-export default swapClass(elem, toggledClass, matchAll) {
+export default function toggleClass(elem, toggledClass, matchAll) {
 
-  if (!(cssClass1 && (cssClass1 = cssClass1.trim()))) {
-    return 0;
-  }
-  if (!(cssClass2 && (cssClass2 = cssClass2.trim()))) {
+  if (!(toggledClass && (toggledClass = toggledClass.trim()))) {
     return 0;
   }
   var cssClass = elem.className,
     newClass;
 
   if (cssClass && (cssClass = cssClass.trim())) {
-    if (cssClass === cssClass1) {
-      elem.className = cssClass2;
-      return 1;
-    }
-    if (cssClass === cssClass2) {
-      elem.className = cssClass1;
+    if (cssClass === toggledClass) {
+      elem.className = '';
       return -1;
     }
-
-    newClass = cssClass.replace(regClass(cssClass1), '');
-    if (newClass !== cssClass) {
-      elem.className = newClass + ' ' + cssClass2;
+    newClass = cssClass.replace(regClass(toggledClass), '');
+    if (newClass === cssClass) {
+      elem.className = cssClass + ' ' + toggledClass;
       return 1;
     }
-
-    newClass = cssClass.replace(regClass(cssClass2), '');
-    if (newClass !== cssClass) {
-      elem.className = newClass + ' ' + cssClass1;
+    if (toggledClass.indexOf(' ') < 0 || !matchAll) {
+      elem.className = newClass;
       return -1;
     }
+    
   }
-  return 0;
+  elem.className = toggledClass;
+  return 1;
 }

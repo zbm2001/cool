@@ -1,5 +1,5 @@
 import regClass from './regClass';
-import typeOf from './typeOf';
+import typeOf from './util/typeOf';
 
 /**
  * 为元素替换指定的样式类
@@ -10,7 +10,7 @@ import typeOf from './typeOf';
  * @param  {Boolean} whether 指定被替换的样式类无论是否存在，也要添加用来替换的样式类
  * @return {Boolean} 返回结果表明是否实际替换了样式类
  */
-export default replaceClass(elem, beReplacedClass, replacedClass, whether) {
+export default function replaceClass(elem, beReplacedClass, replacedClass, whether) {
   var cssClass, newClass, isString;
   // 若没有指定样式类
   if(!replacedClass || typeof replacedClass !== 'string'){

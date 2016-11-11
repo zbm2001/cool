@@ -6,12 +6,12 @@ import regClass from './regClass';
  * @param  {HTMLElement} elem DOM元素
  * @param  {String} cssClass1 指定交换的样式类1
  * @param  {String} cssClass2 指定交换的样式类2
- * @return {Number} range{-1,1} 返回实际交换的状态码
+ * @return {Number} range{-1,1} 返回实际交换的标识码
  *   返回  1 顺序后一个替换了前一个的样式类
  *   返回  0 未做任何替换
  *   返回 -1 逆序前一个替换了后一个的样式类
  */
-export default swapClass(elem, cssClass1, cssClass2) {
+export default function swapClass(elem, cssClass1, cssClass2) {
   var cssClass, newClass;
   // 若没有指定样式类
   if (!cssClass1 || typeof cssClass1 !== 'string' || !(cssClass1 = cssClass1.trim())) {

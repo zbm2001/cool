@@ -4,7 +4,7 @@
  * @param  {HTMLElement} elem DOM元素
  * @return {Object} 返回元素各个边的相对于页面的坐标及尺寸
  */
-export default rectCoord(elem) {
+export default function rectCoord(elem) {
     
   var doc = elem.ownerDocument,
     docRoot = doc.documentElement,

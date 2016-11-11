@@ -1,6 +1,5 @@
+import {rSpaces_g, rRNTFs_g} from './regExps';
 import regClass from './regClass';
-
-var rSpacesRNTFG = /[\r\n\t\f]+/g;
 
 /**
  * 检测元素是否包含指定的样式类
@@ -10,7 +9,7 @@ var rSpacesRNTFG = /[\r\n\t\f]+/g;
  * @param  {Boolean} matchAll 指定是否全部匹配（当指定检测多个样式类时）
  * @return {Boolean}
  */
-export default hasClass(elem, testClass, matchAll) {
+export default function hasClass(elem, testClass, matchAll) {
   // 若没有指定样式类
   if(!testClass || (typeof testClass === 'string' ? !(testClass = testClass.trim()) : !testClass.test)){
     return false;
@@ -29,7 +28,7 @@ export default hasClass(elem, testClass, matchAll) {
       return true;
     }
 
-    cssClass = cssClass.replace(rSpacesRNTFG, ' ');
+    cssClass = cssClass.replace(rRNTFs_g, ' ');
 
     // 若元素为单样式类
     if (cssClass.indexOf(' ') < 0) {
@@ -42,7 +41,7 @@ export default hasClass(elem, testClass, matchAll) {
     // 若检测多样式类
     if (matchAll) {
       newClass = (' ' + cssClass + ' ');
-      testClass = (' ' + testClass.replace(rSpacesG, ' , ') + ' ').split(',');
+      testClass = (' ' + testClass.replace(rSpaces_g, ' , ') + ' ').split(',');
       l = testClass.length;
       while (--l) {
         if (newClass.indexOf(testClass[l]) < 0) {

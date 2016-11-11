@@ -8,6 +8,6 @@ import ancestorAll from './ancestorAll';
  * @param  {HTMLElement} root 指定一个祖先元素作为检索终止的根元素
  * @return {HTMLElement|null} 返回匹配元素或null
  */
-export default iiancestorAll(elem, selector, root) {
+export default function iiancestorAll(elem, selector, root) {
   return ancestorAll(elem, selector, root, true);
 }

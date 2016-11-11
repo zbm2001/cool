@@ -9,6 +9,6 @@ import ancestor from './ancestor';
  * @param  {HTMLElement} root 指定一个祖先元素作为检索终止的根元素
  * @return {HTMLElement|null} 返回匹配元素或null
  */
-export default iiancestor(elem, selector, root) {
+export default function iiancestor(elem, selector, root) {
   return ancestor(elem, selector, root, true);
 }

@@ -1,4 +1,4 @@
-import $ from '../lib/jquery/jquery';
+import matches from './matches';
 
 /**
  * 从一个元素向上检索所有匹配的祖先元素
@@ -9,18 +9,13 @@ import $ from '../lib/jquery/jquery';
  * @param  {Boolean} includeItself 是否包含开始查找的元素自身
  * @return {HTMLElement|null} 返回匹配元素或null
  */
-export default ancestorAll(elem, selector, root, includeItself) {
-  var arr = [], parentNode = elem;
+export default function ancestorAll(elem, selector, root, includeItself) {
+  var arr = [],
+    parentNode = elem;
+  includeItself && matches(elem, selector) && arr.push(elem);
   root || (root = elem.ownerDocument);
-  if(includeItself){
-    if($(elem).is(selector)){
-      arr.push(elem);
-    }
-  }
-  while((parentNode = parentNode.parentNode) && parentNode !== root){
-    if($(parentNode).is(selector)){
-      arr.push(elem);
-    }
+  while ((parentNode = parentNode.parentNode) && parentNode !== root) {
+    matches(parentNode, selector) && arr.push(elem);
   }
   return arr;
 }
