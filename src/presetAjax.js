@@ -36,19 +36,25 @@ export default function presetAjax($, preOptions, preHandleEvents, presetOptions
 
     $ajax = $.ajax(newOptions);
 
+    // 同步请求直接返回原jquery ajax对象
+    if ('async' in newOptions && !newOptions.async) {
+      return $ajax;
+    }
+
+    // 异步请求
     // 这里是为解决某些虽然请求success，但可能业务失败的预处理场景
-    $ajaxThen = $ajax.then(function(res) {
-      // 只覆盖属性
+    $ajaxThen = $ajax.then(function(res) { //console.log(res);console.log($ajaxThen)
+      // 后只覆盖属性（此时$ajax属性已变更）
       extendBind($ajaxThen, $ajax, true);
-      // jquery对原生Promise对象不可直接使用返回
-      // return results.success !== false ? res : Promise.reject(res);
-      // 调整为jquery模拟接口的Deferred对象
+      // jquery对原生Promise返回对象不可直接使用
+      //return results.success !== false ? res : Promise.reject(res);
       return results.success !== false ? res : $.Deferred().reject(res);
     });
 
+    // 先只覆盖方法（绑定scope为$ajax）
     return extendBind($ajaxThen, $ajax, false);
 
-    // 让return出的对象保持abort可用
+    // 让return出的对象保持某些原方法可用（如：abort）
     // 将原 jQuery ajax 对象的绑定方法和属性，附加到then出的目标对象上
     // 被附加的绑定方法执行时，scope依然为原对象
     function extendBind(target, source, nofn) {
