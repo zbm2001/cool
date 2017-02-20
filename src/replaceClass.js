@@ -1,5 +1,5 @@
 import regClass from './regClass';
-import typeOf from './util/typeOf';
+import {typeOf} from 'z-utils/src';
 
 /**
  * 为元素替换指定的样式类
