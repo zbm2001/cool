@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/i18n/zh-CN.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/zbm2001/datajs" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getCultureInfo">getCultureInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-CultureInfos">CultureInfos</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/i18n/zh-CN.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">export default {
+  /* Culture Name */
+  name: &quot;zh-CN&quot;,
+  englishName: &quot;Chinese (People&apos;s Republic of China)&quot;,
+  nativeName: &quot;&#x4E2D;&#x6587;(&#x4E2D;&#x534E;&#x4EBA;&#x6C11;&#x5171;&#x548C;&#x56FD;)&quot;,
+
+  /* Day Name Strings */
+  dayNames: [&quot;&#x661F;&#x671F;&#x65E5;&quot;, &quot;&#x661F;&#x671F;&#x4E00;&quot;, &quot;&#x661F;&#x671F;&#x4E8C;&quot;, &quot;&#x661F;&#x671F;&#x4E09;&quot;, &quot;&#x661F;&#x671F;&#x56DB;&quot;, &quot;&#x661F;&#x671F;&#x4E94;&quot;, &quot;&#x661F;&#x671F;&#x516D;&quot;],
+  abbreviatedDayNames: [&quot;&#x65E5;&quot;, &quot;&#x4E00;&quot;, &quot;&#x4E8C;&quot;, &quot;&#x4E09;&quot;, &quot;&#x56DB;&quot;, &quot;&#x4E94;&quot;, &quot;&#x516D;&quot;],
+  shortestDayNames: [&quot;&#x65E5;&quot;, &quot;&#x4E00;&quot;, &quot;&#x4E8C;&quot;, &quot;&#x4E09;&quot;, &quot;&#x56DB;&quot;, &quot;&#x4E94;&quot;, &quot;&#x516D;&quot;],
+  firstLetterDayNames: [&quot;&#x65E5;&quot;, &quot;&#x4E00;&quot;, &quot;&#x4E8C;&quot;, &quot;&#x4E09;&quot;, &quot;&#x56DB;&quot;, &quot;&#x4E94;&quot;, &quot;&#x516D;&quot;],
+
+  /* Month Name Strings */
+  monthNames: [&quot;&#x4E00;&#x6708;&quot;, &quot;&#x4E8C;&#x6708;&quot;, &quot;&#x4E09;&#x6708;&quot;, &quot;&#x56DB;&#x6708;&quot;, &quot;&#x4E94;&#x6708;&quot;, &quot;&#x516D;&#x6708;&quot;, &quot;&#x4E03;&#x6708;&quot;, &quot;&#x516B;&#x6708;&quot;, &quot;&#x4E5D;&#x6708;&quot;, &quot;&#x5341;&#x6708;&quot;, &quot;&#x5341;&#x4E00;&#x6708;&quot;, &quot;&#x5341;&#x4E8C;&#x6708;&quot;],
+  abbreviatedMonthNames: [&quot;&#x4E00;&#x6708;&quot;, &quot;&#x4E8C;&#x6708;&quot;, &quot;&#x4E09;&#x6708;&quot;, &quot;&#x56DB;&#x6708;&quot;, &quot;&#x4E94;&#x6708;&quot;, &quot;&#x516D;&#x6708;&quot;, &quot;&#x4E03;&#x6708;&quot;, &quot;&#x516B;&#x6708;&quot;, &quot;&#x4E5D;&#x6708;&quot;, &quot;&#x5341;&#x6708;&quot;, &quot;&#x5341;&#x4E00;&#x6708;&quot;, &quot;&#x5341;&#x4E8C;&#x6708;&quot;],
+
+  /* AM/PM Designators */
+  amDesignator: &quot;&#x4E0A;&#x5348;&quot;,
+  pmDesignator: &quot;&#x4E0B;&#x5348;&quot;,
+
+  firstDayOfWeek: 0,
+  twoDigitYearMax: 2029,
+
+  /**
+   * The dateElementOrder is based on the order of the
+   * format specifiers in the formatPatterns.DatePattern.
+   *
+   * Example:
+   &lt;pre&gt;
+   shortDatePattern    dateElementOrder
+   ------------------  ----------------
+   &quot;M/d/yyyy&quot;          &quot;mdy&quot;
+   &quot;dd/MM/yyyy&quot;        &quot;dmy&quot;
+   &quot;yyyy-MM-dd&quot;        &quot;ymd&quot;
+   &lt;/pre&gt;
+   *
+   * The correct dateElementOrder is required by the parser to
+   * determine the expected order of the date elements in the
+   * string being parsed.
+   */
+  dateElementOrder: &quot;ymd&quot;,
+
+  /* Standard date and time format patterns */
+  formatPatterns: {
+    shortDate: &quot;yyyy/M/d&quot;,
+    longDate: &quot;yyyy&apos;&#x5E74;&apos;M&apos;&#x6708;&apos;d&apos;&#x65E5;&apos;&quot;,
+    shortTime: &quot;H:mm&quot;,
+    longTime: &quot;H:mm:ss&quot;,
+    fullDateTime: &quot;yyyy&apos;&#x5E74;&apos;M&apos;&#x6708;&apos;d&apos;&#x65E5;&apos; H:mm:ss&quot;,
+    sortableDateTime: &quot;yyyy-MM-ddTHH:mm:ss&quot;,
+    universalSortableDateTime: &quot;yyyy-MM-dd HH:mm:ssZ&quot;,
+    rfc1123: &quot;ddd, dd MMM yyyy HH:mm:ss GMT&quot;,
+    monthDay: &quot;M&apos;&#x6708;&apos;d&apos;&#x65E5;&apos;&quot;,
+    yearMonth: &quot;yyyy&apos;&#x5E74;&apos;M&apos;&#x6708;&apos;&quot;
+  },
+
+  /* date and time Names hash String */
+  unitNames: {
+    millisecond: &quot;&#x6BEB;&#x79D2;&quot;,
+    second: &quot;&#x79D2;&quot;,
+    minute: &quot;&#x5206;&#x949F;&quot;,
+    hour: &quot;&#x5C0F;&#x65F6;&quot;,
+    day: &quot;&#x5929;&quot;,
+    week: &quot;&#x5468;&quot;,
+    month: &quot;&#x6708;&quot;,
+    quarter: &quot;&#x5B63;&#x5EA6;&quot;,
+    year: &quot;&#x5E74;&quot;,
+    century: &quot;&#x4E16;&#x7EAA;&quot;
+  },
+
+  /**
+   * NOTE: If a string format is not parsing correctly, but
+   * you would expect it parse, the problem likely lies below.
+   *
+   * The following regex patterns control most of the string matching
+   * within the parser.
+   *
+   * The Month name and Day name patterns were automatically generated
+   * and in general should be (mostly) correct.
+   *
+   * Beyond the month and day name patterns are natural language strings.
+   * Example: &quot;next&quot;, &quot;today&quot;, &quot;months&quot;
+   *
+   * These natural language string may NOT be correct for this culture.
+   * If they are not correct, please translate and edit this file
+   * providing the correct regular expression pattern.
+   *
+   * If you modify this file, please post your revised CultureInfo file
+   * to the Datejs Forum located at http://www.datejs.com/forums/.
+   *
+   * Please mark the subject of the post with [CultureInfo]. Example:
+   *    Subject: [CultureInfo] Translated &quot;da-DK&quot; Danish(Denmark)
+   *
+   * We will add the modified patterns to the master source files.
+   *
+   * As well, please review the list of &quot;Future Strings&quot; section below.
+   */
+  regexPatterns: {
+    jan: /^&#x4E00;&#x6708;/i,
+    feb: /^&#x4E8C;&#x6708;/i,
+    mar: /^&#x4E09;&#x6708;/i,
+    apr: /^&#x56DB;&#x6708;/i,
+    may: /^&#x4E94;&#x6708;/i,
+    jun: /^&#x516D;&#x6708;/i,
+    jul: /^&#x4E03;&#x6708;/i,
+    aug: /^&#x516B;&#x6708;/i,
+    sep: /^&#x4E5D;&#x6708;/i,
+    oct: /^&#x5341;&#x6708;/i,
+    nov: /^&#x5341;&#x4E00;&#x6708;/i,
+    dec: /^&#x5341;&#x4E8C;&#x6708;/i,
+
+    sun: /^&#x661F;&#x671F;&#x65E5;/i,
+    mon: /^&#x661F;&#x671F;&#x4E00;/i,
+    tue: /^&#x661F;&#x671F;&#x4E8C;/i,
+    wed: /^&#x661F;&#x671F;&#x4E09;/i,
+    thu: /^&#x661F;&#x671F;&#x56DB;/i,
+    fri: /^&#x661F;&#x671F;&#x4E94;/i,
+    sat: /^&#x661F;&#x671F;&#x516D;/i,
+
+    future: /^next/i,
+    past: /^last|past|prev(ious)?/i,
+    add: /^(\+|aft(er)?|from|hence)/i,
+    subtract: /^(\-|bef(ore)?|ago)/i,
+
+    yesterday: /^yes(terday)?/i,
+    today: /^t(od(ay)?)?/i,
+    tomorrow: /^tom(orrow)?/i,
+    now: /^n(ow)?/i,
+
+    millisecond: /^ms|milli(second)?s?/i,
+    second: /^sec(ond)?s?/i,
+    minute: /^mn|min(ute)?s?/i,
+    hour: /^h(our)?s?/i,
+    week: /^w(eek)?s?/i,
+    month: /^m(onth)?s?/i,
+    day: /^d(ay)?s?/i,
+    year: /^y(ear)?s?/i,
+
+    shortMeridian: /^(a|p)/i,
+    longMeridian: /^(a\.?m?\.?|p\.?m?\.?)/i,
+    timezone: /^((e(s|d)t|c(s|d)t|m(s|d)t|p(s|d)t)|((gmt)?\s*(\+|\-)\s*\d\d\d\d?)|gmt|utc)/i,
+    ordinalSuffix: /^\s*(st|nd|rd|th)/i,
+    timeContext: /^\s*(\:|a(?!u|p)|p)/i
+  },
+
+  timezones: [{name:&quot;UTC&quot;, offset:&quot;-000&quot;}, {name:&quot;GMT&quot;, offset:&quot;-000&quot;}, {name:&quot;EST&quot;, offset:&quot;-0500&quot;}, {name:&quot;EDT&quot;, offset:&quot;-0400&quot;}, {name:&quot;CST&quot;, offset:&quot;-0600&quot;}, {name:&quot;CDT&quot;, offset:&quot;-0500&quot;}, {name:&quot;MST&quot;, offset:&quot;-0700&quot;}, {name:&quot;MDT&quot;, offset:&quot;-0600&quot;}, {name:&quot;PST&quot;, offset:&quot;-0800&quot;}, {name:&quot;PDT&quot;, offset:&quot;-0700&quot;}]
+};
+
+/********************
+ ** Future Strings **
+ ********************
+ *
+ * The following list of strings may not be currently being used, but
+ * may be incorporated into the Datejs library later.
+ *
+ * We would appreciate any help translating the strings below.
+ *
+ * If you modify this file, please post your revised CultureInfo file
+ * to the Datejs Forum located at http://www.datejs.com/forums/.
+ *
+ * Please mark the subject of the post with [CultureInfo]. Example:
+ *    Subject: [CultureInfo] Translated &quot;da-DK&quot; Danish(Denmark)b
+ *
+ * English Name        Translated
+ * ------------------  -----------------
+ * about               about
+ * ago                 ago
+ * date                date
+ * time                time
+ * calendar            calendar
+ * show                show
+ * hourly              hourly
+ * daily               daily
+ * weekly              weekly
+ * bi-weekly           bi-weekly
+ * fortnight           fortnight
+ * monthly             monthly
+ * bi-monthly          bi-monthly
+ * quarter             quarter
+ * quarterly           quarterly
+ * yearly              yearly
+ * annual              annual
+ * annually            annually
+ * annum               annum
+ * again               again
+ * between             between
+ * after               after
+ * from now            from now
+ * repeat              repeat
+ * times               times
+ * per                 per
+ * min (abbrev minute) min
+ * morning             morning
+ * noon                noon
+ * night               night
+ * midnight            midnight
+ * mid-night           mid-night
+ * evening             evening
+ * final               final
+ * future              future
+ * spring              spring
+ * summer              summer
+ * fall                fall
+ * winter              winter
+ * end of              end of
+ * end                 end
+ * long                long
+ * short               short
+ */</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

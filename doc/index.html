@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl">
+  <title data-ice="title">API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/zbm2001/datajs" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getCultureInfo">getCultureInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-CultureInfos">CultureInfos</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h1 id="datejs">datejs</h1>
+<h2 id="-">&#x5B89;&#x88C5;</h2>
+<p>npm i z-date</p>
+<h2 id="-">&#x7EC4;&#x4EF6;&#x63A5;&#x53E3;</h2>
+<p>&#x5BF9;Date&#x539F;&#x751F;&#x5BF9;&#x8C61;&#x7684;&#x539F;&#x578B;&#x548C;&#x9759;&#x6001;&#x65B9;&#x6CD5;&#x505A;&#x6269;&#x5C55;</p>
+<h3 id="date-">Date&#x539F;&#x578B;&#x65B9;&#x6CD5;&#x548C;&#x5C5E;&#x6027;</h3>
+<p>date.setTimeToFirst (&#x65B9;&#x6CD5;)<br>date.setTimeToLast (&#x65B9;&#x6CD5;)<br>date.setTimeByDate (&#x65B9;&#x6CD5;)<br>date.setTimeByNow (&#x65B9;&#x6CD5;)<br>date.compareTo (&#x65B9;&#x6CD5;)<br>date.equals (&#x65B9;&#x6CD5;)<br>date.isBefore (&#x65B9;&#x6CD5;)<br>date.isAfter (&#x65B9;&#x6CD5;)<br>date.between (&#x65B9;&#x6CD5;)<br>date.clone (&#x65B9;&#x6CD5;)<br>date.addMilliseconds (&#x65B9;&#x6CD5;)<br>date.addSeconds (&#x65B9;&#x6CD5;)<br>date.addMinutes (&#x65B9;&#x6CD5;)<br>date.addHours (&#x65B9;&#x6CD5;)<br>date.addDays (&#x65B9;&#x6CD5;)<br>date.addWeeks (&#x65B9;&#x6CD5;)<br>date.addMonths (&#x65B9;&#x6CD5;)<br>date.addYears (&#x65B9;&#x6CD5;)<br>date.getNaturalMonth (&#x65B9;&#x6CD5;)<br>date.setNaturalMonth (&#x65B9;&#x6CD5;)<br>date.getDaysPerMonth (&#x65B9;&#x6CD5;)<br>date.getDaysPerQuarter (&#x65B9;&#x6CD5;)<br>date.getMonthDays (&#x65B9;&#x6CD5;)<br>date.getQuarterDays (&#x65B9;&#x6CD5;)<br>date.getYearDays (&#x65B9;&#x6CD5;)<br>date.getCenturyDays (&#x65B9;&#x6CD5;)<br>date.getQuarter (&#x65B9;&#x6CD5;)<br>date.getCentury (&#x65B9;&#x6CD5;)<br>date.getQuarterDate (&#x65B9;&#x6CD5;)<br>date.getYearDate (&#x65B9;&#x6CD5;)<br>date.getCenturyDate (&#x65B9;&#x6CD5;)<br>date.isLeapYear (&#x65B9;&#x6CD5;)<br>date.isAverageYear (&#x65B9;&#x6CD5;)<br>date.getDateByClassifier (&#x65B9;&#x6CD5;)<br>date.getRestDaysByClassifier (&#x65B9;&#x6CD5;)<br>date.getDaysByClassifier (&#x65B9;&#x6CD5;)<br>date.getDaysByPastClassifiers (&#x65B9;&#x6CD5;)<br>date.getDaysByPastMonths (&#x65B9;&#x6CD5;)<br>date.getDaysByPastQuarters (&#x65B9;&#x6CD5;)<br>date.getDaysByPastYears (&#x65B9;&#x6CD5;)<br>date.getDaysByPastCenturies (&#x65B9;&#x6CD5;)<br>date.getDaysByNextClassifiers (&#x65B9;&#x6CD5;)<br>date.getDaysByNextMonths (&#x65B9;&#x6CD5;)<br>date.getDaysByNextQuarters (&#x65B9;&#x6CD5;)<br>date.getDaysByNextYears (&#x65B9;&#x6CD5;)<br>date.getDaysByNextCenturies (&#x65B9;&#x6CD5;)<br>date.getYearWeek (&#x65B9;&#x6CD5;)<br>date.getQuarterWeek (&#x65B9;&#x6CD5;)<br>date.getMonthWeek (&#x65B9;&#x6CD5;)<br>date.set (&#x65B9;&#x6CD5;)<br>date.getUTCOffset (&#x65B9;&#x6CD5;)<br>date.getTimezone (&#x65B9;&#x6CD5;)<br>date.setTimezoneOffset (&#x65B9;&#x6CD5;)<br>date.setTimezone (&#x65B9;&#x6CD5;)<br>date.format (&#x65B9;&#x6CD5;)  </p>
+<h3 id="date-">Date&#x9759;&#x6001;&#x65B9;&#x6CD5;&#x548C;&#x5C5E;&#x6027;</h3>
+<p>Date.i18n (&#x5C5E;&#x6027;)<br>Date.isDate (&#x65B9;&#x6CD5;)<br>Date.validateMillisecond (&#x65B9;&#x6CD5;)<br>Date.validateSecond (&#x65B9;&#x6CD5;)<br>Date.validateMinute (&#x65B9;&#x6CD5;)<br>Date.validateHour (&#x65B9;&#x6CD5;)<br>Date.validateDay (&#x65B9;&#x6CD5;)<br>Date.validateDate (&#x65B9;&#x6CD5;)<br>Date.validateMonth (&#x65B9;&#x6CD5;)<br>Date.validateNaturalMonth (&#x65B9;&#x6CD5;)<br>Date.validateYear (&#x65B9;&#x6CD5;)<br>Date.today (&#x65B9;&#x6CD5;)<br>Date.getDaysPerMonth (&#x65B9;&#x6CD5;)<br>Date.getMonthDays (&#x65B9;&#x6CD5;)<br>Date.getNaturalMonthDays (&#x65B9;&#x6CD5;)<br>Date.getQuarterDays (&#x65B9;&#x6CD5;)<br>Date.getYearDays (&#x65B9;&#x6CD5;)<br>Date.getCenturyDays (&#x65B9;&#x6CD5;)<br>Date.getCenturyDaysByYear (&#x65B9;&#x6CD5;)<br>Date.getCentury (&#x65B9;&#x6CD5;)<br>Date.isLeapYear (&#x65B9;&#x6CD5;)<br>Date.isAverageYear (&#x65B9;&#x6CD5;)<br>Date.parse2Date (&#x65B9;&#x6CD5;)<br>Date.parse2DateFormatsByPeriod (&#x65B9;&#x6CD5;)<br>Date.parse2DateObjectsByPeriod (&#x65B9;&#x6CD5;)<br>Date.getTimezoneAbbreviation (&#x65B9;&#x6CD5;)<br>Date.getTimezoneOffset (&#x65B9;&#x6CD5;)<br>Date.FORMAT (&#x5C5E;&#x6027;)<br>Date.FORMAT_DATE (&#x5C5E;&#x6027;)<br>Date.FORMAT_DATETIME (&#x5C5E;&#x6027;)<br>Date.UTC_FORMAT (&#x5C5E;&#x6027;)<br>Date.pluralClassifiers (&#x5C5E;&#x6027;)<br>Date.rPeriod (&#x5C5E;&#x6027;)  </p>
+<h2 id="-">&#x7EC4;&#x4EF6;&#x6784;&#x5EFA;</h2>
+<h3 id="-rollup-config-js-">&#x4ECE;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x6784;&#x5EFA;&#xFF08;rollup.config.js&#xFF09;</h3>
+<p>npm run build // rollup -c</p>
+<p>&#x6216;&#x8005;&#xFF1A;</p>
+<h3 id="-">&#x81EA;&#x5B9A;&#x4E49;&#x6784;&#x5EFA;</h3>
+<p>npm run build:js // node rollup</p>
+</div>
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

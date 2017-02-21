@@ -1,0 +1,10 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+doc/
+node_modules/
+.project
+.idea
+.esdoc.json

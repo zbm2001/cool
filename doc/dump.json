@@ -1,0 +1,914 @@
+[
+  {
+    "__docId__": 0,
+    "kind": "file",
+    "name": "src/core.js",
+    "content": "import {typeOf, assign} from 'z-utils/src';\r\nimport {default as i18n, getCultureInfo} from './i18n';\r\n\r\nvar ry = /y+/,\r\n  rM = /M+/,\r\n  rd = /d+/,\r\n  rh = /h+/,\r\n  rm = /m+/,\r\n  rs = /s+/,\r\n  rS = /S+/,\r\n\r\n  ry_g = /y+/g,\r\n  rM_g = /M+/g,\r\n  rd_g = /d+/g,\r\n  rh_g = /h+/g,\r\n  rm_g = /m+/g,\r\n  rs_g = /s+/g,\r\n  rS_g = /S+/g,\r\n\r\n  rMdhms_g = /[Mdhms]+/g,\r\n  rDigits_g = /\\d+/g,\r\n  rPeriod = /^(this|last|past|next)\\s*([0-9]*)\\s*(days?|weeks?|months?|quarters?|years?|century|centuries)$/i,\r\n\r\n  // 每月天数（平年）\r\n  perMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],\r\n  // 每季度天数（平年）\r\n  perQuarterDays = [90, 91, 92, 92];\r\n\r\nDate.i18n = i18n;\r\n\r\n// 扩展日期类的原型方法\r\nassign(Date.prototype, {\r\n\r\n  /**\r\n   * 设置日期对象的时间为 00:00:00 000\r\n   * @returns {number} 当前日期对象的毫秒数\r\n   */\r\n  setTimeToFirst: function() {\r\n    return this.setHours(0, 0, 0, 0);\r\n  },\r\n\r\n  /**\r\n   * 设置日期对象的时间为 23:59:59 999\r\n   * @returns {number} 当前日期对象的毫秒数\r\n   */\r\n  setTimeToLast: function() {\r\n    return this.setHours(23, 59, 59, 999);\r\n  },\r\n\r\n  /**\r\n   * 设置时间与目标日期对象的时间一致 hh:mm:ss SSS\r\n   * @param {Date} date\r\n   * @returns {number} 当前日期对象的毫秒数\r\n   */\r\n  setTimeByDate: function(date) {\r\n    return this.setHours(date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());\r\n  },\r\n\r\n  /**\r\n   * 设置时间与当前日期对象的时间一致 hh:mm:ss SSS\r\n   * @returns {number} 当前日期对象的毫秒数\r\n   */\r\n  setTimeByNow: function() {\r\n    return this.setTimeByDate(new Date());\r\n  },\r\n\r\n  /**\r\n   * 与另一个日期对象比较毫秒数大小\r\n   * @param {Date} date\r\n   * @returns {number} range{-1,0,1}\r\n   */\r\n  compareTo: function(date) {\r\n    if (Date.isDate(date)) {\r\n      return this < date ? -1 : this > date ? 1 : 0;\r\n    }\r\n    throw new TypeError(date + \" is not a Date object\");\r\n  },\r\n\r\n  /**\r\n   * 判断与另一个日期对象的毫秒数一致\r\n   * @param {Date} date\r\n   * @returns {Boolean}\r\n   */\r\n  equals: function(date) {\r\n    return this.compareTo(date) === 0;\r\n  },\r\n\r\n  /**\r\n   * 判断比另一个日期对象的毫秒数小\r\n   * @param {Date} date\r\n   * @returns {Boolean}\r\n   */\r\n  isBefore: function(date) {\r\n    return this.compareTo(date) < 0;\r\n  },\r\n\r\n  /**\r\n   * 判断比另一个日期对象的毫秒数大\r\n   * @param {Date} date\r\n   * @returns {Boolean}\r\n   */\r\n  isAfter: function(date) {\r\n    return this.compareTo(date) > 0;\r\n  },\r\n\r\n  /**\r\n   * 判断在某个起止时间段内\r\n   * @param {Date} start 起始时间\r\n   * @param {Date} end 结束时间\r\n   * @returns {Boolean}\r\n   */\r\n  between: function(start, end) {\r\n    return this.compareTo(start) >= 0 && this.compareTo(end) <= 0;\r\n  },\r\n\r\n  /**\r\n   * 复制一个日期对象\r\n   * @returns {Date}\r\n   */\r\n  clone: function() {\r\n    return new Date(this.getTime());\r\n  },\r\n\r\n  /**\r\n   * 增加日期的毫秒数\r\n   * @param {Number} number [Required]\r\n   * @return {Date} this\r\n   */\r\n  addMilliseconds: function(number) {\r\n    this.setMilliseconds(this.getMilliseconds() + number * 1);\r\n    return this;\r\n  },\r\n\r\n  /**\r\n   * 增加日期的秒数\r\n   * @param {Number} number [Required]\r\n   * @return {Date} this\r\n   */\r\n  addSeconds: function(number) {\r\n    return this.addMilliseconds(number * 1000);\r\n  },\r\n\r\n  /**\r\n   * 增加日期的分钟数\r\n   * @param {Number} number [Required]\r\n   * @return {Date} this\r\n   */\r\n  addMinutes: function(number) {\r\n    return this.addMilliseconds(number * 60 * 1000);\r\n  },\r\n\r\n  /**\r\n   * 增加日期的小时数\r\n   * @param {Number} number [Required]\r\n   * @return {Date} this\r\n   */\r\n  addHours: function(number) {\r\n    return this.addMilliseconds(number * 60 * 60 * 1000);\r\n  },\r\n\r\n  /**\r\n   * 增加日期的天数\r\n   * @param {Number} number [Required]\r\n   * @return {Date} this\r\n   */\r\n  addDays: function(number) {\r\n    this.setDate(this.getDate() + number * 1);\r\n    return this;\r\n  },\r\n\r\n  /**\r\n   * 增加日期的周数\r\n   * @param {Number} number [Required]\r\n   * @return {Date} this\r\n   */\r\n  addWeeks: function(number) {\r\n    return this.addDays(number * 7);\r\n  },\r\n\r\n  /**\r\n   * 增加日期的月份\r\n   * @param {Number} number [Required]\r\n   * @return {Date} this\r\n   */\r\n  addMonths: function(number) {\r\n    var n = this.getDate();\r\n    this.setDate(1);\r\n    this.setMonth(this.getMonth() + number * 1);\r\n    this.setDate(Math.min(n, this.getMonthDays()));\r\n    return this;\r\n  },\r\n\r\n  /**\r\n   * 增加日期的年份\r\n   * @param {Number} number [Required]\r\n   * @return {Date} this\r\n   */\r\n  addYears: function(number) {\r\n    return this.addMonths(number * 12);\r\n  },\r\n\r\n  /**\r\n   * 获取当月份自然数\r\n   * @returns {number} range{1,12}\r\n   */\r\n  getNaturalMonth: function() {\r\n    return this.getMonth() + 1;\r\n  },\r\n\r\n  /**\r\n   * 设置当前日期对象的月份\r\n   * @param {number} month 月份\r\n   * @returns {number} 当前日期对象的毫秒数\r\n   */\r\n  setNaturalMonth: function(month) {\r\n    if (Date.validateNaturalMonth(month)) {\r\n      return this.setMonth(month - 1);\r\n    }\r\n    this.getTime();\r\n  },\r\n\r\n  /**\r\n   * 获取当年每月天数的数组\r\n   * @returns {Array.<number>} length{12} range{28,31}\r\n   */\r\n  getDaysPerMonth: function() {\r\n    var year = this.getFullYear(),\r\n      d = perMonthDays.slice();\r\n    (year % 4 || !(year % 400)) || (d[1] = 29);\r\n    return d;\r\n  },\r\n\r\n  /**\r\n   * 获取当年每季度天数的数组\r\n   * @returns {Array.<number>} length{4} range{91,92}\r\n   */\r\n  getDaysPerQuarter: function() {\r\n    var year = this.getFullYear(),\r\n      d = perQuarterDays.slice();\r\n    (year % 4 || !(year % 400)) || (d[0] = 91);\r\n    return d;\r\n  },\r\n\r\n  /**\r\n   * 获取当年当月的天数\r\n   * @returns {number} range{28,31}\r\n   */\r\n  getMonthDays: function() {\r\n    var month = this.getMonth(),\r\n      year;\r\n    if (month !== 1) {\r\n      return perMonthDays[month];\r\n    }\r\n    year = this.getFullYear();\r\n    return year % 4 || !(year % 400) ? 28 : 29;\r\n  },\r\n\r\n  /**\r\n   * 获取当年当季度的天数\r\n   * @returns {number} range{91,92}\r\n   */\r\n  getQuarterDays: function() {\r\n    var quarter = this.getQuarter(),\r\n      year;\r\n    if (quarter !== 1) {\r\n      return perQuarterDays[quarter - 1];\r\n    }\r\n    year = this.getFullYear();\r\n    return year % 4 || !(year % 400) ? 90 : 91;\r\n  },\r\n\r\n  /**\r\n   * 获取当年的天数\r\n   * @returns {number} range{365,366}\r\n   */\r\n  getYearDays: function() {\r\n    var year = this.getFullYear();\r\n    return year % 4 || !(year % 400) ? 365 : 366;\r\n  },\r\n\r\n  /**\r\n   * 获取当世纪的天数\r\n   * @returns {number} range{36523,36524}\r\n   */\r\n  getCenturyDays: function() {\r\n    var days = 0,\r\n      year = this.getFullYear(),\r\n      startYear = parseInt(year / 100) * 100;\r\n\r\n    days += 100 * 365 + parseInt(99 / 4);\r\n    // 若本世纪元年为闰年，再加一天\r\n    !(startYear % 400) && days++;\r\n\r\n    return days;\r\n  },\r\n\r\n  /**\r\n   * 获取当季度数\r\n   * @returns {number} range{1,4}\r\n   */\r\n  getQuarter: function() {\r\n    return parseInt((this.getMonth() + 3) / 3);\r\n  },\r\n\r\n  /**\r\n   * 获取当世纪数\r\n   * @returns {Number}\r\n   */\r\n  getCentury: function() {\r\n    var year = this.getFullYear();\r\n    return parseInt(year / 100);\r\n  },\r\n\r\n  /**\r\n   * 获取当季度的第多少天\r\n   * @returns {number} range{1,92}\r\n   */\r\n  getQuarterDate: function() {\r\n    var month = this.getMonth(),\r\n      days = month && this.getDaysPerMonth().slice(parseInt(month / 3) * 3, month).reduce(function(a, b) {\r\n        return a + b;\r\n      }, 0);\r\n    return days + this.getDate();\r\n  },\r\n\r\n  /**\r\n   * 获取当年的第多少天\r\n   * @returns {number} range{1,366}\r\n   */\r\n  getYearDate: function() {\r\n    var month = this.getMonth(),\r\n      days = month && this.getDaysPerMonth().slice(0, month).reduce(function(a, b) {\r\n        return a + b;\r\n      }, 0);\r\n    return days + this.getDate();\r\n  },\r\n\r\n  /**\r\n   * 获取当个世纪的第多少天\r\n   * @returns {number} range{1,36524}\r\n   */\r\n  getCenturyDate: function() {\r\n    var date = this.getYearDate(),\r\n      year = this.getFullYear(),\r\n      startYear = parseInt(year / 100) * 100;\r\n\r\n    date += (year - startYear - 1) * 365 + parseInt((year - startYear) / 4);\r\n    // 若本世纪元年为闰年，再加一天\r\n    !(startYear % 400) && date++;\r\n\r\n    return date;\r\n  },\r\n\r\n  /**\r\n   * 判断当年是否为闰年\r\n   * @returns {boolean}\r\n   */\r\n  isLeapYear: function() {\r\n    var year = this.getFullYear();\r\n    return !(year % 4 || !(year % 400));\r\n  },\r\n\r\n  /**\r\n   * 判断当年是否为平年\r\n   * @returns {boolean}\r\n   */\r\n  isAverageYear: function() {\r\n    var year = this.getFullYear();\r\n    return !!(year % 4) || !(year % 400);\r\n  },\r\n\r\n  /**\r\n   * 获取当个时间跨度量词段的第多少天\r\n   * @param {string} classifier\r\n   * @returns {number} range{1,36524}\r\n   */\r\n  getDateByClassifier: function(classifier) {\r\n    switch (classifier) {\r\n      case \"day\":\r\n        return 1;\r\n      case \"week\":\r\n        return this.getDay();\r\n      case \"month\":\r\n        return this.getDate();\r\n      case \"quarter\":\r\n        return this.getQuarterDate();\r\n      case \"year\":\r\n        return this.getYearDate();\r\n      case \"century\":\r\n        return this.getCenturyDate();\r\n      default:\r\n        return 1;\r\n    }\r\n  },\r\n\r\n  /**\r\n   * 获取当个时间跨度量词段的剩余天数\r\n   * @param {string} classifier\r\n   * @returns {number}\r\n   */\r\n  getRestDaysByClassifier: function(classifier) {\r\n    switch (classifier) {\r\n      case \"day\":\r\n        return 0;\r\n      case \"week\":\r\n        return 6 - this.getDay();\r\n      case \"month\":\r\n        return this.getMonthDays() - this.getDate();\r\n      case \"quarter\":\r\n        return this.getQuarterDays() - this.getQuarterDate();\r\n      case \"year\":\r\n        return this.getYearDays() - this.getYearDate();\r\n      case \"century\":\r\n        return this.getCenturyDays() - this.getCenturyDate();\r\n      default:\r\n        return 0;\r\n    }\r\n  },\r\n\r\n  /**\r\n   * 获取当个时间跨度量词段的天数\r\n   * @param {string} classifier\r\n   * @returns {number} range{1, 36524}\r\n   */\r\n  getDaysByClassifier: function(classifier) {\r\n    switch (classifier) {\r\n      case \"day\":\r\n        return 1;\r\n      case \"week\":\r\n        return 7;\r\n      case \"month\":\r\n        return this.getMonthDays();\r\n      case \"quarter\":\r\n        return this.getQuarterDays();\r\n      case \"year\":\r\n        return this.getYearDays();\r\n      case \"century\":\r\n        return this.getCenturyDays();\r\n      default:\r\n        return 1;\r\n    }\r\n  },\r\n\r\n  /**\r\n   * 获取过去多个时间跨度量词段的天数，不包含当前的跨度量词段\r\n   * @param {string} classifier\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByPastClassifiers: function(classifier, number) {\r\n    switch (classifier) {\r\n      case \"day\":\r\n        return number;\r\n      case \"week\":\r\n        return 7 * number;\r\n      case \"month\":\r\n        return this.getDaysByPastMonths(number);\r\n      case \"quarter\":\r\n        return this.getDaysByPastQuarters(number);\r\n      case \"year\":\r\n        return this.getDaysByPastYears(number);\r\n      case \"century\":\r\n        return this.getDaysByPastCenturies(number);\r\n      default:\r\n        return number;\r\n    }\r\n  },\r\n\r\n  /**\r\n   * 获取过去月数的天数，不包含当前的月份\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByPastMonths: function(number) {\r\n    var month = this.getMonth() + 1,\r\n      year = this.getFullYear(),\r\n      days = 0;\r\n    for (; number > 0; number--) {\r\n      if (--month < 1) {\r\n        month = 12;\r\n        year--;\r\n      }\r\n      days += Date.getMonthDays(month, year);\r\n    }\r\n    return days;\r\n  },\r\n\r\n  /**\r\n   * 获取过去季度数的天数，不包含当前的季度\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByPastQuarters: function(number) {\r\n    var quarter = this.getQuarter(),\r\n      year = this.getFullYear(),\r\n      days = 0;\r\n    for (; number > 0; number--) {\r\n      if (--quarter < 1) {\r\n        quarter = 4;\r\n        year--;\r\n      }\r\n      days += Date.getQuarterDays(quarter, year);\r\n    }\r\n    return days;\r\n  },\r\n\r\n  /**\r\n   * 获取过去年数的天数，不包含当前的年份\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByPastYears: function(number) {\r\n    var year = this.getFullYear(),\r\n      days = 0;\r\n    for (; number > 0; number--) {\r\n      days += Date.getYearDays(--year);\r\n    }\r\n    return days;\r\n  },\r\n\r\n  /**\r\n   * 获取过去世纪数的天数，不包含当前的世纪\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByPastCenturies: function(number) {\r\n    var century = this.getCentury(),\r\n      days = 0;\r\n    for (; number > 0; number--) {\r\n      days += Date.getCenturyDays(--century);\r\n    }\r\n    return days;\r\n  },\r\n\r\n  /**\r\n   * 获取过去多个时间跨度量词段的天数，不包含当前的跨度量词段\r\n   * @param {string} classifier\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByNextClassifiers: function(classifier, number) {\r\n    switch (classifier) {\r\n      case \"day\":\r\n        return number;\r\n      case \"week\":\r\n        return 7 * number;\r\n      case \"month\":\r\n        return this.getDaysByNextMonths(number);\r\n      case \"quarter\":\r\n        return this.getDaysByNextQuarters(number);\r\n      case \"year\":\r\n        return this.getDaysByNextYears(number);\r\n      case \"century\":\r\n        return this.getDaysByNextCenturies(number);\r\n      default:\r\n        return number;\r\n    }\r\n  },\r\n\r\n  /**\r\n   * 获取将来月数的天数，不包含当前的月份\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByNextMonths: function(number) {\r\n    var month = this.getMonth() + 1,\r\n      year = this.getFullYear(),\r\n      days = 0;\r\n    for (; number > 0; number--) {\r\n      if (++month > 12) {\r\n        month = 1;\r\n        year++;\r\n      }\r\n      days += Date.getMonthDays(month, year);\r\n    }\r\n    return days;\r\n  },\r\n\r\n  /**\r\n   * 获取将来季度数的天数，不包含当前的季度\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByNextQuarters: function(number) {\r\n    var quarter = this.getQuarter(),\r\n      year = this.getFullYear(),\r\n      days = 0;\r\n    for (; number > 0; number--) {\r\n      if (++quarter > 4) {\r\n        quarter = 1;\r\n        year++;\r\n      }\r\n      days += Date.getQuarterDays(quarter, year);\r\n    }\r\n    return days;\r\n  },\r\n\r\n  /**\r\n   * 获取将来年数的天数，不包含当前的年份\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByNextYears: function(number) {\r\n    var year = this.getFullYear(),\r\n      days = 0;\r\n    for (; number > 0; number--) {\r\n      days += Date.getYearDays(++year);\r\n    }\r\n    return days;\r\n  },\r\n\r\n  /**\r\n   * 获取将来世纪数的天数，不包含当前的世纪\r\n   * @param {number} number\r\n   * @returns {number}\r\n   */\r\n  getDaysByNextCenturies: function(number) {\r\n    var century = this.getCentury(),\r\n      days = 0;\r\n    for (; number > 0; number--) {\r\n      days += Date.getCenturyDays(++century);\r\n    }\r\n    return days;\r\n  },\r\n\r\n  // 获取当年第多少周\r\n  getYearWeek: function() {\r\n\r\n  },\r\n\r\n  // 获取当季第多少周\r\n  getQuarterWeek: function() {\r\n\r\n  },\r\n\r\n  // 获取当月第多少周\r\n  getMonthWeek: function() {\r\n\r\n  },\r\n\r\n  /**\r\n   * 通过一组配置项设置时间\r\n   * @param {Object} config\r\n   * @returns {Object} this\r\n   */\r\n  set: function(config) {\r\n    if (Date.validateMillisecond(config.millisecond)) {\r\n      this.addMilliseconds(config.millisecond - this.getMilliseconds());\r\n    }\r\n\r\n    if (Date.validateSecond(config.second)) {\r\n      this.addSeconds(config.second - this.getSeconds());\r\n    }\r\n\r\n    if (Date.validateMinute(config.minute)) {\r\n      this.addMinutes(config.minute - this.getMinutes());\r\n    }\r\n\r\n    if (Date.validateHour(config.hour)) {\r\n      this.addHours(config.hour - this.getHours());\r\n    }\r\n\r\n    if (Date.validateMonth(config.month)) {\r\n      this.addMonths(config.month - this.getMonth());\r\n    }\r\n\r\n    if (Date.validateYear(config.year)) {\r\n      this.addYears(config.year - this.getFullYear());\r\n    }\r\n\r\n    /* day has to go last because you can't validate the day without first knowing the month */\r\n    if (Date.validateDay(config.day, this.getMonth(), this.getFullYear())) {\r\n      this.addDays(config.day - this.getDate());\r\n    }\r\n\r\n    if (config.timezone) {\r\n      this.setTimezone(config.timezone);\r\n    }\r\n\r\n    if (config.timezoneOffset) {\r\n      this.setTimezoneOffset(config.timezoneOffset);\r\n    }\r\n\r\n    if (config.week && validate(config.week, 0, 53, \"week\")) {\r\n      this.setWeek(config.week);\r\n    }\r\n\r\n    return this;\r\n  },\r\n\r\n  /**\r\n   * Get the offset from UTC of the current date.\r\n   * @return {String} The 4-character offset string prefixed with + or - (e.g. \"-0500\")\r\n   */\r\n  getUTCOffset: function() {\r\n    var n = this.getTimezoneOffset() * -10 / 6,\r\n      r;\r\n    if (n < 0) {\r\n      r = (n - 10000).toString();\r\n      return r.charAt(0) + r.substr(2);\r\n    } else {\r\n      r = (n + 10000).toString();\r\n      return \"+\" + r.substr(1);\r\n    }\r\n  },\r\n\r\n  /**\r\n   * Get the time zone abbreviation of the current date.\r\n   * @return {String} The abbreviated time zone name (e.g. \"EST\")\r\n   */\r\n  getTimezone: function() {\r\n    return Date.getTimezoneAbbreviation(this.getUTCOffset());\r\n  },\r\n\r\n  /**\r\n   * Set the time zone abbreviation of the current date.\r\n   * @param {string} offset\r\n   * @return {String} The abbreviated time zone name (e.g. \"EST\")\r\n   */\r\n  setTimezoneOffset: function(offset) {\r\n    // 返回协调通用时间(UTC)与当前主机时间之间的分钟差值\r\n    // 函数的返回值为Number类型，返回当前计算机上的时间和UTC时间之间相差的分钟数。\r\n    // 一般而言，如果当地时间早于UTC时间(在UTC时区以东，例如亚洲地区)，则返回值为负；如果当地时间晚于UTC时间(在UTC时区以西，例如美洲地区)，则返回值为正。\r\n    var here = this.getTimezoneOffset(),\r\n      there = Number(offset) * -6 / 10;\r\n    return this.addMinutes(there - here);\r\n  },\r\n\r\n  /**\r\n   * Set the time zone abbreviation of the current date.\r\n   * @param {string} offset\r\n   * @return {String} The abbreviated time zone name (e.g. \"EST\")\r\n   */\r\n  setTimezone: function(offset) {\r\n    return this.setTimezoneOffset(Date.getTimezoneOffset(offset));\r\n  },\r\n\r\n  /**\r\n   * 返回格式化后的日期格式\r\n   * @param {string} format\r\n   * @returns {string}\r\n   */\r\n  format: function(format) {\r\n\r\n    format || (format = Date.FORMAT);\r\n\r\n    var date = this,\r\n      a = [\r\n        //[ry, \"getFullYear\"] //year\r\n        [rM, \"getNaturalMonth\"], //month + 1\r\n        [rd, \"getDate\"], //day\r\n        [rh, \"getHours\"], //hour\r\n        [rm, \"getMinutes\"], //minute\r\n        [rs, \"getSeconds\"] //second\r\n        //,[rS, \"getMilliseconds\"] //millisecond\r\n        //,[\"q\", \"getQuarter\"]  //quarter\r\n      ],\r\n      i = 0,\r\n      l = a.length;\r\n\r\n    format = format.replace(ry, function(m) {\r\n      return (date.getFullYear() + '').substr(-m.length);\r\n    });\r\n\r\n    for (; i < l; i++) {\r\n      format = format.replace(a[i][0], function(m) {\r\n        var p = date[a[i][1]]();\r\n        return (p > 9 || m.length < 2 ? '' : '0') + p;\r\n      });\r\n    }\r\n\r\n    format = format.replace(rS, function(m) {\r\n      var S = date.getMilliseconds();\r\n      return (S > 99 || m.length < 3 ? '' : '0') + S;\r\n    });\r\n\r\n    format = format.replace('q', function(m) {\r\n      return parseInt((date.getMonth() + 3) / 3);\r\n    });\r\n\r\n    return format;\r\n  }\r\n\r\n});\r\n\r\n/**\r\n * 验证与时间相关数值合法性\r\n * @param {Number} n 需要验证数值\r\n * @param {Number} min 指定数值范围的最小值\r\n * @param {Number} max 指定数值范围的最大值\r\n * @param {String} name \r\n * @returns {Boolean}\r\n */\r\nfunction validate(n, min, max, name) {\r\n  if (n == null) {\r\n    return false;\r\n  }\r\n  if (typeof n != \"number\") {\r\n    throw new TypeError(n + \" is not a Number.\");\r\n  } else if (n < min || n > max) {\r\n    throw new RangeError(n + \" is not a valid value for \" + name + \".\");\r\n  }\r\n  return true;\r\n}\r\n\r\n/**\r\n * 解析时段用语，返回起始和结束两个日期对象的数组\r\n * @param {string} period\r\n * @returns {Array.<Date>} length{2}\r\n */\r\nfunction parse2DatesByPeriod(period) {\r\n\r\n  var now = new Date(),\r\n    start,\r\n    start0 = new Date(),\r\n    end,\r\n    end2 = new Date(),\r\n    diffStartDays = 0,\r\n    diffEndDays = 0,\r\n    classifier,\r\n    classifierPlural,\r\n    thisClassifierDays;\r\n\r\n  // 设置开始时间为那天的 0 时计起\r\n  start0.setTimeToFirst();\r\n  start = start0;\r\n  // 设置结束时间为那天的最后一毫秒截止\r\n  end2.setTimeToLast();\r\n  end = end2;\r\n\r\n  switch (period) {\r\n    case 'today': // 今天\r\n      diffStartDays = 0;\r\n      break;\r\n    case 'yesterday': // 昨天\r\n      diffStartDays = -1;\r\n      diffEndDays = -1;\r\n      break;\r\n    case 'thisWeek': // 本周\r\n      diffStartDays = 1 - start.getDay();\r\n      break;\r\n    case 'lastWeek': // 上周\r\n      diffEndDays = -end.getDay();\r\n      diffStartDays = diffEndDays + 1 - 7;\r\n      break;\r\n    case 'thisMonth': // 本月\r\n      diffStartDays = 1 - start.getDate();\r\n      break;\r\n    case 'lastMonth': // 上月\r\n      diffEndDays = -end.getDate();\r\n      now.setDate(0);\r\n      diffStartDays = diffEndDays + 1 - now.getMonthDays();\r\n      break;\r\n    case 'thisQuarter': // 本季度\r\n      diffStartDays = 1 - start.getQuarterDate();\r\n      break;\r\n    case 'lastQuarter': // 上季度\r\n      diffEndDays = -end.getQuarterDate();\r\n      now.setDate(diffEndDays + now.getDate());\r\n      diffStartDays = diffEndDays + 1 - now.getQuarterDays();\r\n      break;\r\n    case 'thisYear': // 本年\r\n      diffStartDays = 1 - start.getYearDate();\r\n      break;\r\n    case 'lastYear': // 上年\r\n      diffEndDays = -end.getYearDate();\r\n      now.setFullYear(now.getFullYear() - 1);\r\n      diffStartDays = diffEndDays + 1 - now.getYearDays();\r\n      break;\r\n    default:\r\n      // last7days, last30days, last90days, last365days...\r\n      // last5months, last3Quarter, last2years, last1centuries...\r\n      // past10days, past4months...\r\n      if (rPeriod.test(period) && (number = parseInt(RegExp.$2)) > 0) {\r\n        classifierPlural = RegExp.$3;\r\n        if (classifier = Date.pluralClassifiers[classifierPlural]) {\r\n\r\n          switch (RegExp.$1) {\r\n            // last 表示最近的天、周、月、季度、年、世纪数，分别对应包含今天、本周、本月、本季度、本年、本世纪\r\n            case 'last':\r\n              diffStartDays = -now.getDaysByPastClassifiers(classifier, number) + 1;\r\n              break;\r\n              // past 表示过去的天、周、月、季度、年、世纪数，分别对应不包含今天、本周、本月、本季度、本年、本世纪\r\n            case 'past':\r\n              diffStartDays = -now.getDaysByPastClassifiers(classifier, number);\r\n              thisClassifierDays = now.getDateByClassifier(classifier, number);\r\n              diffStartDays -= thisClassifierDays - 1;\r\n              diffEndDays -= thisClassifierDays;\r\n              break;\r\n              // past 表示将来的天、周、月、季度、年、世纪数，分别对应不包含今天、本周、本月、本季度、本年、本世纪\r\n            case 'next':\r\n              diffEndDays = now.getDaysByNextClassifiers(classifier, number);\r\n              thisClassifierDays = now.getRestDaysByClassifier(classifier, number);\r\n              diffStartDays += thisClassifierDays + 1;\r\n              diffEndDays += thisClassifierDays;\r\n              break;\r\n            default:\r\n          }\r\n        }\r\n      }\r\n      throw new Error('Unknown time period definition: ' + period);\r\n  }\r\n  start.setDate(start.getDate() + diffStartDays);\r\n  end.setDate(end.getDate() + diffEndDays);\r\n\r\n  return [start, end];\r\n}\r\n\r\n// 扩展静态方法\r\nexport default assign(Date, {\r\n\r\n  /**\r\n   * 判断是否为日期对象\r\n   * @param {Date} date\r\n   * @returns {boolean}\r\n   */\r\n  isDate: function(date) {\r\n    return typeOf(date) === '[object Date]';\r\n  },\r\n\r\n\r\n  /**\r\n   * 验证每秒的毫秒数值范围\r\n   * @param {Number} range{0, 999}\r\n   * @return {Boolean}\r\n   */\r\n  validateMillisecond: function(value) {\r\n    return validate(value, 0, 999, \"millisecond\");\r\n  },\r\n\r\n  /**\r\n   * 验证每分钟的秒数值范围\r\n   * @param {Number} range{0, 59}\r\n   * @return {Boolean}\r\n   */\r\n  validateSecond: function(value) {\r\n    return validate(value, 0, 59, \"second\");\r\n  },\r\n\r\n  /**\r\n   * 验证每小时的分钟数值范围\r\n   * @param {Number} range{0, 59}\r\n   * @return {Boolean}\r\n   */\r\n  validateMinute: function(value) {\r\n    return validate(value, 0, 59, \"minute\");\r\n  },\r\n\r\n  /**\r\n   * 验证每天的小时数值范围\r\n   * @param {Number} range{0, 23}\r\n   * @return {Boolean}\r\n   */\r\n  validateHour: function(value) {\r\n    return validate(value, 0, 23, \"hour\");\r\n  },\r\n\r\n  /**\r\n   * 验证每周的天数值范围\r\n   * @param {Number} range{0, 6}\r\n   * @return {Boolean}\r\n   */\r\n  validateDay: function(value) {\r\n    return validate(value, 0, 6, \"day\");\r\n  },\r\n\r\n  /**\r\n   * 验证每月天数值范围\r\n   * @param {Number} range{0, 31}\r\n   * @return {Boolean}\r\n   */\r\n  validateDate: function(value, month, year) {\r\n    return validate(value, 1, Date.getMonthDays(month, year), \"date\");\r\n  },\r\n\r\n  /**\r\n   * 验证每年的月份数值范围\r\n   * @param {Number} range{0, 11}\r\n   * @return {Boolean}\r\n   */\r\n  validateMonth: function(value) {\r\n    return validate(value, 0, 11, \"month\");\r\n  },\r\n\r\n  /**\r\n   * 验证每年的自然月份数值范围\r\n   * @param {Number} range{1, 12}\r\n   * @return {Boolean}\r\n   */\r\n  validateNaturalMonth: function(value) {\r\n    return validate(value, 1, 12, \"natural month\");\r\n  },\r\n\r\n  /**\r\n   * 验证年份数值范围\r\n   * @param {Number} range{0, 9999}\r\n   * @return {Boolean}\r\n   */\r\n  validateYear: function(value) {\r\n    return validate(value, 0, 9999, \"year\");\r\n  },\r\n\r\n  /**\r\n   * 创建一个当天的日期对象，时间为 00:00:00 000\r\n   * @returns {Date}\r\n   */\r\n  today: function() {\r\n    var date = new Date();\r\n    date.setHours(0, 0, 0, 0);\r\n    return date;\r\n  },\r\n\r\n  /**\r\n   * 获取某年每月天数的数组\r\n   * @param {number} year 年份\r\n   * @returns {Array.<number>}\r\n   */\r\n  getDaysPerMonth: function(year) {\r\n    var d = perMonthDays.slice();\r\n    Date.isLeapYear(year) && (d[1] = 29);\r\n    return d;\r\n  },\r\n\r\n  /**\r\n   * 获取某年某自然月份的天数\r\n   * @param {number} month 月份\r\n   * @param {number} year 年份\r\n   * @returns {number} range{28, 31}\r\n   */\r\n  getMonthDays: function(month, year) {\r\n    return month !== 2 ? perMonthDays[month - 1] : year % 4 || !(year % 400) ? 28 : 29;\r\n  },\r\n\r\n  /**\r\n   * 获取某年某月份的天数\r\n   * @param {number} month 月份\r\n   * @param {number} year 年份\r\n   * @returns {number} range{28, 31}\r\n   */\r\n  getNaturalMonthDays: function(month, year) {\r\n    return month !== 1 ? perMonthDays[month] : year % 4 || !(year % 400) ? 28 : 29;\r\n  },\r\n\r\n  /**\r\n   * 获取某年某季度的天数\r\n   * @param {number} quarter 季度\r\n   * @param {number} year 年份\r\n   * @returns {number} range{90, 92}\r\n   */\r\n  getQuarterDays: function(quarter, year) {\r\n    return quarter !== 1 ? perQuarterDays[quarter - 1] : year % 4 || !(year % 400) ? 90 : 91;\r\n  },\r\n\r\n  /**\r\n   * 获取某年份的天数\r\n   * @param {number} year 年份\r\n   * @returns {number} range{365,366}\r\n   */\r\n  getYearDays: function(year) {\r\n    return year % 4 || !(year % 400) ? 365 : 366;\r\n  },\r\n\r\n  /**\r\n   * 获取某世纪的天数\r\n   * @param {number} century 世纪\r\n   * @returns {number} range{36523,36524}\r\n   */\r\n  getCenturyDays: function(century) {\r\n    var days = 0,\r\n      startYear = (Math.abs(century) - 1) * 100;\r\n\r\n    days += (100) * 365 + parseInt(99 / 4);\r\n    // 若本世纪元年为闰年，再加一天\r\n    !(startYear % 400) && days++;\r\n\r\n    return days;\r\n  },\r\n\r\n  /**\r\n   * 获取某年份所属世纪的天数\r\n   * @param {number} year 年份\r\n   * @returns {number} range{36523,36524}\r\n   */\r\n  getCenturyDaysByYear: function(year) {\r\n    var century = Date.getCentury(year);\r\n    return Date.getCenturyDays(century);\r\n  },\r\n\r\n  /**\r\n   * 获取某年份所属的世纪数\r\n   * @param {number} year\r\n   * @returns {number}\r\n   */\r\n  getCentury: function(year) {\r\n    return parseInt(year / 100) + (year < 0 ? 1 : -1);\r\n  },\r\n\r\n  /**\r\n   * 判断年份是否为闰年\r\n   * @param {number} year 年份\r\n   * @returns {boolean}\r\n   */\r\n  isLeapYear: function(year) {\r\n    return !(year % 4 || !(year % 400));\r\n  },\r\n\r\n  /**\r\n   * 判断年份是否为平年\r\n   * @param {number} year 年份\r\n   * @returns {boolean}\r\n   */\r\n  isAverageYear: function(year) {\r\n    return !!(year % 4) || !(year % 400);\r\n  },\r\n\r\n  /**\r\n   * 解析格式化的日期，返回相应的日期对象\r\n   * @param {string} time '2012-3-13 11:11:11 111' | '2012-3-13T11:11:11.111Z' | '2012-3-13' | '3/13/2012' | ...\r\n   * @param {string} format  'yyyy-MM-dd hh:mm:ss SSS' | 'yyyy-MM-ddThh:mm:ss.SSSZ' |  'yyyy-MM-dd' | 'MM/dd/yyyy' | ...\r\n   * @returns {Date}\r\n   */\r\n  parse2Date: function(time, format) {\r\n    // 若为毫秒数\r\n    if (typeof time === 'number') {\r\n      return new Date(time);\r\n    }\r\n    time = String(time);\r\n\r\n    // 若能正确解析，返回该时间的毫秒数\r\n    // 若不能正确解析，返回NaN\r\n    var M = Date.parse(time);\r\n    if (M === M) {\r\n      return new Date(M);\r\n    }\r\n\r\n    format = format ? format.replace(rMdhms_g, function(m) {\r\n      return (m = m.charAt(0)) + m;\r\n    }) : Date.FORMAT;\r\n\r\n    time = time.replace(rDigits_g, function(m) {\r\n      return m.length < 2 ? '0' + m : m;\r\n    });\r\n\r\n    var r, m, n,\r\n      d = new Date,\r\n      a = [\r\n        [ry_g, \"setFullYear\"] //year\r\n        ,\r\n        [rM_g, \"setRealMonth\"] //month + 1\r\n        ,\r\n        [rd_g, \"setDate\"] //day\r\n        ,\r\n        [rh_g, \"setHours\"] //hour\r\n        ,\r\n        [rm_g, \"setMinutes\"] //minute\r\n        ,\r\n        [rs_g, \"setSeconds\"] //second\r\n        ,\r\n        [rS_g, \"setMilliseconds\"] //millisecond\r\n      ],\r\n      i = -1,\r\n      l = a.length;\r\n\r\n    while (++i < l) {\r\n      r = a[i][0];\r\n      m = a[i][1];\r\n      d[m](r.test(format) ? parseInt(time.slice(r.lastIndex - RegExp.lastMatch.length, r.lastIndex)) || 0 : 0);\r\n      r.lastIndex = 0;\r\n    }\r\n    return d;\r\n  },\r\n\r\n  /**\r\n   * 解析时段用语，返回起始和结束两个时间格式字符串的数组\r\n   * @param {string} period\r\n   * @param {string} format\r\n   * @returns {Array.<string>}\r\n   */\r\n  parse2DateFormatsByPeriod: function(period, format) {\r\n    var dates = parse2DatesByPeriod(period);\r\n    format || (format = Date.FORMAT);\r\n    return [\r\n      dates[0].format(format),\r\n      dates[1].format(format)\r\n    ];\r\n  },\r\n\r\n  /**\r\n   * 解析时段用语，返回起始和结束两个日期对象的数组\r\n   * @param {string} period\r\n   * @returns {Array.<Date>}\r\n   */\r\n  parse2DateObjectsByPeriod: function(period) {\r\n    return parse2DatesByPeriod(period);\r\n  },\r\n\r\n  /**\r\n   * 根据时区的偏移量（字符串表述）获取时区的缩写名\r\n   * @param {String} offset The 4-character offset string prefixed with + or - (e.g. \"-0500\")\r\n   * @returns {String} 如：UTC|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT\r\n   */\r\n  getTimezoneAbbreviation: function(offset) {\r\n    var CultureInfo = getCultureInfo(),\r\n      timezones = CultureInfo.timezones;\r\n    for (let i = 0, l = timezones.length; i < l; i++) {\r\n      if (timezones[i].offset === offset) {\r\n        return timezones[i].name;\r\n      }\r\n    }\r\n    return null;\r\n  },\r\n\r\n  /**\r\n   * 根据时区的缩写名获取时区的偏移量（字符串表述）\r\n   * @param {String} name 如：UTC|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT\r\n   * @returns {String} The 4-character offset string prefixed with + or - (e.g. \"-0500\")\r\n   */\r\n  getTimezoneOffset: function(name) {\r\n    var CultureInfo = getCultureInfo(),\r\n      timezones = CultureInfo.timezones;\r\n    for (let i = 0, l = timezones.length; i < l; i++) {\r\n      if (timezones[i].name === name.toUpperCase()) {\r\n        return timezones[i].offset;\r\n      }\r\n    }\r\n    return null;\r\n  },\r\n\r\n  FORMAT: 'yyyy-MM-dd hh:mm:ss SSS',\r\n  FORMAT_DATE: 'yyyy-MM-dd',\r\n  FORMAT_DATETIME: 'yyyy-MM-dd hh:mm:ss',\r\n\r\n  UTC_FORMAT: 'yyyy-MM-ddThh:mm:ss.SSSZ',\r\n\r\n  // Hash表：时间量词复数词对应原词\r\n  // 毫秒、秒、分钟、小时、天、周、月、季度、年、世纪\r\n  pluralClassifiers: {\r\n    milliseconds: \"millisecond\",\r\n    seconds: \"second\",\r\n    minutes: \"minute\",\r\n    hours: \"hour\",\r\n    days: \"day\",\r\n    weeks: \"week\",\r\n    months: \"month\",\r\n    quarters: \"quarter\",\r\n    years: \"year\",\r\n    centuries: \"century\"\r\n  },\r\n\r\n  // 匹配时段语句的正则表达式\r\n  rPeriod: rPeriod\r\n\r\n})",
+    "static": true,
+    "longname": "src/core.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 1,
+    "kind": "variable",
+    "name": "ry",
+    "memberof": "src/core.js",
+    "static": true,
+    "longname": "src/core.js~ry",
+    "access": null,
+    "export": false,
+    "importPath": "z-date/src/core.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 4,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "undefined"
+      ]
+    }
+  },
+  {
+    "__docId__": 2,
+    "kind": "function",
+    "name": "validate",
+    "memberof": "src/core.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/core.js~validate",
+    "access": null,
+    "export": false,
+    "importPath": "z-date/src/core.js",
+    "importStyle": null,
+    "description": "验证与时间相关数值合法性",
+    "lineNumber": 794,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Boolean}"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "n",
+        "description": "需要验证数值"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "min",
+        "description": "指定数值范围的最小值"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "max",
+        "description": "指定数值范围的最大值"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "String"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "name",
+        "description": ""
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean"
+      ],
+      "spread": false,
+      "description": ""
+    }
+  },
+  {
+    "__docId__": 3,
+    "kind": "function",
+    "name": "parse2DatesByPeriod",
+    "memberof": "src/core.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/core.js~parse2DatesByPeriod",
+    "access": null,
+    "export": false,
+    "importPath": "z-date/src/core.js",
+    "importStyle": null,
+    "description": "解析时段用语，返回起始和结束两个日期对象的数组",
+    "lineNumber": 811,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Array.<Date>} length{2}"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "period",
+        "description": ""
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Array.<Date>"
+      ],
+      "spread": false,
+      "description": "length{2}"
+    }
+  },
+  {
+    "__docId__": 4,
+    "kind": "file",
+    "name": "src/i18n/en-US.js",
+    "content": "export default {\r\n  /* Culture Name */\r\n  name: \"en-US\",\r\n  englishName: \"English (United States)\",\r\n  nativeName: \"English (United States)\",\r\n\r\n  /* Day Name Strings */\r\n  dayNames: [\"Sunday\", \"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\", \"Saturday\"],\r\n  abbreviatedDayNames: [\"Sun\", \"Mon\", \"Tue\", \"Wed\", \"Thu\", \"Fri\", \"Sat\"],\r\n  shortestDayNames: [\"Su\", \"Mo\", \"Tu\", \"We\", \"Th\", \"Fr\", \"Sa\"],\r\n  firstLetterDayNames: [\"S\", \"M\", \"T\", \"W\", \"T\", \"F\", \"S\"],\r\n\r\n  /* Month Name Strings */\r\n  monthNames: [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\", \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"],\r\n  abbreviatedMonthNames: [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\", \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"],\r\n\r\n  /* AM/PM Designators */\r\n  amDesignator: \"AM\",\r\n  pmDesignator: \"PM\",\r\n\r\n  firstDayOfWeek: 0,\r\n  twoDigitYearMax: 2029,\r\n\r\n  /**\r\n   * The dateElementOrder is based on the order of the\r\n   * format specifiers in the formatPatterns.DatePattern.\r\n   *\r\n   * Example:\r\n   <pre>\r\n   shortDatePattern    dateElementOrder\r\n   ------------------  ----------------\r\n   \"M/d/yyyy\"          \"mdy\"\r\n   \"dd/MM/yyyy\"        \"dmy\"\r\n   \"yyyy-MM-dd\"        \"ymd\"\r\n   </pre>\r\n   *\r\n   * The correct dateElementOrder is required by the parser to\r\n   * determine the expected order of the date elements in the\r\n   * string being parsed.\r\n   */\r\n  dateElementOrder: \"mdy\",\r\n\r\n  /* Standard date and time format patterns */\r\n  formatPatterns: {\r\n    shortDate: \"M/d/yyyy\",\r\n    longDate: \"dddd, MMMM dd, yyyy\",\r\n    shortTime: \"h:mm tt\",\r\n    longTime: \"h:mm:ss tt\",\r\n    fullDateTime: \"dddd, MMMM dd, yyyy h:mm:ss tt\",\r\n    sortableDateTime: \"yyyy-MM-ddTHH:mm:ss\",\r\n    universalSortableDateTime: \"yyyy-MM-dd HH:mm:ssZ\",\r\n    rfc1123: \"ddd, dd MMM yyyy HH:mm:ss GMT\",\r\n    monthDay: \"MMMM dd\",\r\n    yearMonth: \"MMMM, yyyy\"\r\n  },\r\n\r\n  /* date and time Names hash String */\r\n  unitNames: {\r\n    millisecond: \"millisecond\",\r\n    second: \"second\",\r\n    minute: \"minute\",\r\n    hour: \"hour\",\r\n    day: \"day\",\r\n    week: \"week\",\r\n    month: \"month\",\r\n    quarter: \"quarter\",\r\n    year: \"year\",\r\n    century: \"century\"\r\n  },\r\n\r\n  /**\r\n   * NOTE: If a string format is not parsing correctly, but\r\n   * you would expect it parse, the problem likely lies below.\r\n   *\r\n   * The following regex patterns control most of the string matching\r\n   * within the parser.\r\n   *\r\n   * The Month name and Day name patterns were automatically generated\r\n   * and in general should be (mostly) correct.\r\n   *\r\n   * Beyond the month and day name patterns are natural language strings.\r\n   * Example: \"next\", \"today\", \"months\"\r\n   *\r\n   * These natural language string may NOT be correct for this culture.\r\n   * If they are not correct, please translate and edit this file\r\n   * providing the correct regular expression pattern.\r\n   *\r\n   * If you modify this file, please post your revised CultureInfo file\r\n   * to the Datejs Forum located at http://www.datejs.com/forums/.\r\n   *\r\n   * Please mark the subject of the post with [CultureInfo]. Example:\r\n   *    Subject: [CultureInfo] Translated \"da-DK\" Danish(Denmark)\r\n   *\r\n   * We will add the modified patterns to the master source files.\r\n   *\r\n   * As well, please review the list of \"Future Strings\" section below.\r\n   */\r\n  regexPatterns: {\r\n    jan: /^jan(uary)?/i,\r\n    feb: /^feb(ruary)?/i,\r\n    mar: /^mar(ch)?/i,\r\n    apr: /^apr(il)?/i,\r\n    may: /^may/i,\r\n    jun: /^jun(e)?/i,\r\n    jul: /^jul(y)?/i,\r\n    aug: /^aug(ust)?/i,\r\n    sep: /^sep(t(ember)?)?/i,\r\n    oct: /^oct(ober)?/i,\r\n    nov: /^nov(ember)?/i,\r\n    dec: /^dec(ember)?/i,\r\n\r\n    sun: /^su(n(day)?)?/i,\r\n    mon: /^mo(n(day)?)?/i,\r\n    tue: /^tu(e(s(day)?)?)?/i,\r\n    wed: /^we(d(nesday)?)?/i,\r\n    thu: /^th(u(r(s(day)?)?)?)?/i,\r\n    fri: /^fr(i(day)?)?/i,\r\n    sat: /^sa(t(urday)?)?/i,\r\n\r\n    future: /^next/i,\r\n    past: /^last|past|prev(ious)?/i,\r\n    add: /^(\\+|aft(er)?|from|hence)/i,\r\n    subtract: /^(\\-|bef(ore)?|ago)/i,\r\n\r\n    yesterday: /^yes(terday)?/i,\r\n    today: /^t(od(ay)?)?/i,\r\n    tomorrow: /^tom(orrow)?/i,\r\n    now: /^n(ow)?/i,\r\n\r\n    millisecond: /^ms|milli(second)?s?/i,\r\n    second: /^sec(ond)?s?/i,\r\n    minute: /^mn|min(ute)?s?/i,\r\n    hour: /^h(our)?s?/i,\r\n    week: /^w(eek)?s?/i,\r\n    month: /^m(onth)?s?/i,\r\n    day: /^d(ay)?s?/i,\r\n    year: /^y(ear)?s?/i,\r\n\r\n    shortMeridian: /^(a|p)/i,\r\n    longMeridian: /^(a\\.?m?\\.?|p\\.?m?\\.?)/i,\r\n    timezone: /^((e(s|d)t|c(s|d)t|m(s|d)t|p(s|d)t)|((gmt)?\\s*(\\+|\\-)\\s*\\d\\d\\d\\d?)|gmt|utc)/i,\r\n    ordinalSuffix: /^\\s*(st|nd|rd|th)/i,\r\n    timeContext: /^\\s*(\\:|a(?!u|p)|p)/i\r\n  },\r\n\r\n  timezones: [{name:\"UTC\", offset:\"-000\"}, {name:\"GMT\", offset:\"-000\"}, {name:\"EST\", offset:\"-0500\"}, {name:\"EDT\", offset:\"-0400\"}, {name:\"CST\", offset:\"-0600\"}, {name:\"CDT\", offset:\"-0500\"}, {name:\"MST\", offset:\"-0700\"}, {name:\"MDT\", offset:\"-0600\"}, {name:\"PST\", offset:\"-0800\"}, {name:\"PDT\", offset:\"-0700\"}]\r\n};\r\n\r\n/********************\r\n ** Future Strings **\r\n ********************\r\n *\r\n * The following list of strings may not be currently being used, but\r\n * may be incorporated into the Datejs library later.\r\n *\r\n * We would appreciate any help translating the strings below.\r\n *\r\n * If you modify this file, please post your revised CultureInfo file\r\n * to the Datejs Forum located at http://www.datejs.com/forums/.\r\n *\r\n * Please mark the subject of the post with [CultureInfo]. Example:\r\n *    Subject: [CultureInfo] Translated \"da-DK\" Danish(Denmark)b\r\n *\r\n * English Name        Translated\r\n * ------------------  -----------------\r\n * about               about\r\n * ago                 ago\r\n * date                date\r\n * time                time\r\n * calendar            calendar\r\n * show                show\r\n * hourly              hourly\r\n * daily               daily\r\n * weekly              weekly\r\n * bi-weekly           bi-weekly\r\n * fortnight           fortnight\r\n * monthly             monthly\r\n * bi-monthly          bi-monthly\r\n * quarter             quarter\r\n * quarterly           quarterly\r\n * yearly              yearly\r\n * annual              annual\r\n * annually            annually\r\n * annum               annum\r\n * again               again\r\n * between             between\r\n * after               after\r\n * from now            from now\r\n * repeat              repeat\r\n * times               times\r\n * per                 per\r\n * min (abbrev minute) min\r\n * morning             morning\r\n * noon                noon\r\n * night               night\r\n * midnight            midnight\r\n * mid-night           mid-night\r\n * evening             evening\r\n * final               final\r\n * future              future\r\n * spring              spring\r\n * summer              summer\r\n * fall                fall\r\n * winter              winter\r\n * end of              end of\r\n * end                 end\r\n * long                long\r\n * short               short\r\n */",
+    "static": true,
+    "longname": "src/i18n/en-US.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 5,
+    "kind": "file",
+    "name": "src/i18n/zh-CN.js",
+    "content": "export default {\r\n  /* Culture Name */\r\n  name: \"zh-CN\",\r\n  englishName: \"Chinese (People's Republic of China)\",\r\n  nativeName: \"中文(中华人民共和国)\",\r\n\r\n  /* Day Name Strings */\r\n  dayNames: [\"星期日\", \"星期一\", \"星期二\", \"星期三\", \"星期四\", \"星期五\", \"星期六\"],\r\n  abbreviatedDayNames: [\"日\", \"一\", \"二\", \"三\", \"四\", \"五\", \"六\"],\r\n  shortestDayNames: [\"日\", \"一\", \"二\", \"三\", \"四\", \"五\", \"六\"],\r\n  firstLetterDayNames: [\"日\", \"一\", \"二\", \"三\", \"四\", \"五\", \"六\"],\r\n\r\n  /* Month Name Strings */\r\n  monthNames: [\"一月\", \"二月\", \"三月\", \"四月\", \"五月\", \"六月\", \"七月\", \"八月\", \"九月\", \"十月\", \"十一月\", \"十二月\"],\r\n  abbreviatedMonthNames: [\"一月\", \"二月\", \"三月\", \"四月\", \"五月\", \"六月\", \"七月\", \"八月\", \"九月\", \"十月\", \"十一月\", \"十二月\"],\r\n\r\n  /* AM/PM Designators */\r\n  amDesignator: \"上午\",\r\n  pmDesignator: \"下午\",\r\n\r\n  firstDayOfWeek: 0,\r\n  twoDigitYearMax: 2029,\r\n\r\n  /**\r\n   * The dateElementOrder is based on the order of the\r\n   * format specifiers in the formatPatterns.DatePattern.\r\n   *\r\n   * Example:\r\n   <pre>\r\n   shortDatePattern    dateElementOrder\r\n   ------------------  ----------------\r\n   \"M/d/yyyy\"          \"mdy\"\r\n   \"dd/MM/yyyy\"        \"dmy\"\r\n   \"yyyy-MM-dd\"        \"ymd\"\r\n   </pre>\r\n   *\r\n   * The correct dateElementOrder is required by the parser to\r\n   * determine the expected order of the date elements in the\r\n   * string being parsed.\r\n   */\r\n  dateElementOrder: \"ymd\",\r\n\r\n  /* Standard date and time format patterns */\r\n  formatPatterns: {\r\n    shortDate: \"yyyy/M/d\",\r\n    longDate: \"yyyy'年'M'月'd'日'\",\r\n    shortTime: \"H:mm\",\r\n    longTime: \"H:mm:ss\",\r\n    fullDateTime: \"yyyy'年'M'月'd'日' H:mm:ss\",\r\n    sortableDateTime: \"yyyy-MM-ddTHH:mm:ss\",\r\n    universalSortableDateTime: \"yyyy-MM-dd HH:mm:ssZ\",\r\n    rfc1123: \"ddd, dd MMM yyyy HH:mm:ss GMT\",\r\n    monthDay: \"M'月'd'日'\",\r\n    yearMonth: \"yyyy'年'M'月'\"\r\n  },\r\n\r\n  /* date and time Names hash String */\r\n  unitNames: {\r\n    millisecond: \"毫秒\",\r\n    second: \"秒\",\r\n    minute: \"分钟\",\r\n    hour: \"小时\",\r\n    day: \"天\",\r\n    week: \"周\",\r\n    month: \"月\",\r\n    quarter: \"季度\",\r\n    year: \"年\",\r\n    century: \"世纪\"\r\n  },\r\n\r\n  /**\r\n   * NOTE: If a string format is not parsing correctly, but\r\n   * you would expect it parse, the problem likely lies below.\r\n   *\r\n   * The following regex patterns control most of the string matching\r\n   * within the parser.\r\n   *\r\n   * The Month name and Day name patterns were automatically generated\r\n   * and in general should be (mostly) correct.\r\n   *\r\n   * Beyond the month and day name patterns are natural language strings.\r\n   * Example: \"next\", \"today\", \"months\"\r\n   *\r\n   * These natural language string may NOT be correct for this culture.\r\n   * If they are not correct, please translate and edit this file\r\n   * providing the correct regular expression pattern.\r\n   *\r\n   * If you modify this file, please post your revised CultureInfo file\r\n   * to the Datejs Forum located at http://www.datejs.com/forums/.\r\n   *\r\n   * Please mark the subject of the post with [CultureInfo]. Example:\r\n   *    Subject: [CultureInfo] Translated \"da-DK\" Danish(Denmark)\r\n   *\r\n   * We will add the modified patterns to the master source files.\r\n   *\r\n   * As well, please review the list of \"Future Strings\" section below.\r\n   */\r\n  regexPatterns: {\r\n    jan: /^一月/i,\r\n    feb: /^二月/i,\r\n    mar: /^三月/i,\r\n    apr: /^四月/i,\r\n    may: /^五月/i,\r\n    jun: /^六月/i,\r\n    jul: /^七月/i,\r\n    aug: /^八月/i,\r\n    sep: /^九月/i,\r\n    oct: /^十月/i,\r\n    nov: /^十一月/i,\r\n    dec: /^十二月/i,\r\n\r\n    sun: /^星期日/i,\r\n    mon: /^星期一/i,\r\n    tue: /^星期二/i,\r\n    wed: /^星期三/i,\r\n    thu: /^星期四/i,\r\n    fri: /^星期五/i,\r\n    sat: /^星期六/i,\r\n\r\n    future: /^next/i,\r\n    past: /^last|past|prev(ious)?/i,\r\n    add: /^(\\+|aft(er)?|from|hence)/i,\r\n    subtract: /^(\\-|bef(ore)?|ago)/i,\r\n\r\n    yesterday: /^yes(terday)?/i,\r\n    today: /^t(od(ay)?)?/i,\r\n    tomorrow: /^tom(orrow)?/i,\r\n    now: /^n(ow)?/i,\r\n\r\n    millisecond: /^ms|milli(second)?s?/i,\r\n    second: /^sec(ond)?s?/i,\r\n    minute: /^mn|min(ute)?s?/i,\r\n    hour: /^h(our)?s?/i,\r\n    week: /^w(eek)?s?/i,\r\n    month: /^m(onth)?s?/i,\r\n    day: /^d(ay)?s?/i,\r\n    year: /^y(ear)?s?/i,\r\n\r\n    shortMeridian: /^(a|p)/i,\r\n    longMeridian: /^(a\\.?m?\\.?|p\\.?m?\\.?)/i,\r\n    timezone: /^((e(s|d)t|c(s|d)t|m(s|d)t|p(s|d)t)|((gmt)?\\s*(\\+|\\-)\\s*\\d\\d\\d\\d?)|gmt|utc)/i,\r\n    ordinalSuffix: /^\\s*(st|nd|rd|th)/i,\r\n    timeContext: /^\\s*(\\:|a(?!u|p)|p)/i\r\n  },\r\n\r\n  timezones: [{name:\"UTC\", offset:\"-000\"}, {name:\"GMT\", offset:\"-000\"}, {name:\"EST\", offset:\"-0500\"}, {name:\"EDT\", offset:\"-0400\"}, {name:\"CST\", offset:\"-0600\"}, {name:\"CDT\", offset:\"-0500\"}, {name:\"MST\", offset:\"-0700\"}, {name:\"MDT\", offset:\"-0600\"}, {name:\"PST\", offset:\"-0800\"}, {name:\"PDT\", offset:\"-0700\"}]\r\n};\r\n\r\n/********************\r\n ** Future Strings **\r\n ********************\r\n *\r\n * The following list of strings may not be currently being used, but\r\n * may be incorporated into the Datejs library later.\r\n *\r\n * We would appreciate any help translating the strings below.\r\n *\r\n * If you modify this file, please post your revised CultureInfo file\r\n * to the Datejs Forum located at http://www.datejs.com/forums/.\r\n *\r\n * Please mark the subject of the post with [CultureInfo]. Example:\r\n *    Subject: [CultureInfo] Translated \"da-DK\" Danish(Denmark)b\r\n *\r\n * English Name        Translated\r\n * ------------------  -----------------\r\n * about               about\r\n * ago                 ago\r\n * date                date\r\n * time                time\r\n * calendar            calendar\r\n * show                show\r\n * hourly              hourly\r\n * daily               daily\r\n * weekly              weekly\r\n * bi-weekly           bi-weekly\r\n * fortnight           fortnight\r\n * monthly             monthly\r\n * bi-monthly          bi-monthly\r\n * quarter             quarter\r\n * quarterly           quarterly\r\n * yearly              yearly\r\n * annual              annual\r\n * annually            annually\r\n * annum               annum\r\n * again               again\r\n * between             between\r\n * after               after\r\n * from now            from now\r\n * repeat              repeat\r\n * times               times\r\n * per                 per\r\n * min (abbrev minute) min\r\n * morning             morning\r\n * noon                noon\r\n * night               night\r\n * midnight            midnight\r\n * mid-night           mid-night\r\n * evening             evening\r\n * final               final\r\n * future              future\r\n * spring              spring\r\n * summer              summer\r\n * fall                fall\r\n * winter              winter\r\n * end of              end of\r\n * end                 end\r\n * long                long\r\n * short               short\r\n */",
+    "static": true,
+    "longname": "src/i18n/zh-CN.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 6,
+    "kind": "file",
+    "name": "src/i18n.js",
+    "content": "import CultureInfo_0 from './i18n/en-US'\r\nimport CultureInfo_1 from './i18n/zh-CN'\r\n\r\nconst CultureInfos = [CultureInfo_0, CultureInfo_1]\r\n\r\nfunction getCultureInfo() {\r\n  let cultureName = typeof navigator === 'object' ? navigator.language || 'en-US' : 'en-US'\r\n  for (let i = 0, l = CultureInfos.length; i < l; i++) {\r\n    if (CultureInfos[i].name === cultureName) {\r\n      return CultureInfos[i]\r\n    }\r\n  }\r\n  return null\r\n}\r\n\r\nexport {\r\n\tCultureInfos,\r\n\tgetCultureInfo\r\n}\r\n\r\nexport default {\r\n  CultureInfos,\r\n  getCultureInfo\r\n}",
+    "static": true,
+    "longname": "src/i18n.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 7,
+    "kind": "variable",
+    "name": "CultureInfos",
+    "memberof": "src/i18n.js",
+    "static": true,
+    "longname": "src/i18n.js~CultureInfos",
+    "access": null,
+    "export": true,
+    "importPath": "z-date/src/i18n.js",
+    "importStyle": "{CultureInfos}",
+    "description": null,
+    "lineNumber": 4,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "undefined[]"
+      ]
+    }
+  },
+  {
+    "__docId__": 8,
+    "kind": "function",
+    "name": "getCultureInfo",
+    "memberof": "src/i18n.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/i18n.js~getCultureInfo",
+    "access": null,
+    "export": true,
+    "importPath": "z-date/src/i18n.js",
+    "importStyle": "{getCultureInfo}",
+    "description": null,
+    "lineNumber": 6,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 9,
+    "kind": "file",
+    "name": "src/index.js",
+    "content": "export {default} from './core'",
+    "static": true,
+    "longname": "src/index.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 11,
+    "kind": "external",
+    "name": "Infinity",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Infinity",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 12,
+    "kind": "external",
+    "name": "NaN",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~NaN",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 13,
+    "kind": "external",
+    "name": "undefined",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~undefined",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 14,
+    "kind": "external",
+    "name": "null",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~null",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 15,
+    "kind": "external",
+    "name": "Object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Object",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 16,
+    "kind": "external",
+    "name": "object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~object",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 17,
+    "kind": "external",
+    "name": "Function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Function",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 18,
+    "kind": "external",
+    "name": "function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~function",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 19,
+    "kind": "external",
+    "name": "Boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Boolean",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 20,
+    "kind": "external",
+    "name": "boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~boolean",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 21,
+    "kind": "external",
+    "name": "Symbol",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Symbol",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 22,
+    "kind": "external",
+    "name": "Error",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Error",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 23,
+    "kind": "external",
+    "name": "EvalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~EvalError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 24,
+    "kind": "external",
+    "name": "InternalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/InternalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~InternalError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 25,
+    "kind": "external",
+    "name": "RangeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RangeError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 26,
+    "kind": "external",
+    "name": "ReferenceError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ReferenceError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 27,
+    "kind": "external",
+    "name": "SyntaxError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~SyntaxError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 28,
+    "kind": "external",
+    "name": "TypeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~TypeError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 29,
+    "kind": "external",
+    "name": "URIError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~URIError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 30,
+    "kind": "external",
+    "name": "Number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Number",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 31,
+    "kind": "external",
+    "name": "number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~number",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 32,
+    "kind": "external",
+    "name": "Date",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Date",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 33,
+    "kind": "external",
+    "name": "String",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~String",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 34,
+    "kind": "external",
+    "name": "string",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~string",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 35,
+    "kind": "external",
+    "name": "RegExp",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RegExp",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 36,
+    "kind": "external",
+    "name": "Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 37,
+    "kind": "external",
+    "name": "Int8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int8Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 38,
+    "kind": "external",
+    "name": "Uint8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 39,
+    "kind": "external",
+    "name": "Uint8ClampedArray",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8ClampedArray",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 40,
+    "kind": "external",
+    "name": "Int16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int16Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 41,
+    "kind": "external",
+    "name": "Uint16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint16Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 42,
+    "kind": "external",
+    "name": "Int32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int32Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 43,
+    "kind": "external",
+    "name": "Uint32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint32Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 44,
+    "kind": "external",
+    "name": "Float32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float32Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 45,
+    "kind": "external",
+    "name": "Float64Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float64Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float64Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 46,
+    "kind": "external",
+    "name": "Map",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Map",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 47,
+    "kind": "external",
+    "name": "Set",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Set",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 48,
+    "kind": "external",
+    "name": "WeakMap",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakMap",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 49,
+    "kind": "external",
+    "name": "WeakSet",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakSet",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 50,
+    "kind": "external",
+    "name": "ArrayBuffer",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ArrayBuffer",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 51,
+    "kind": "external",
+    "name": "DataView",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~DataView",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 52,
+    "kind": "external",
+    "name": "JSON",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~JSON",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 53,
+    "kind": "external",
+    "name": "Promise",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Promise",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 54,
+    "kind": "external",
+    "name": "Generator",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Generator",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 55,
+    "kind": "external",
+    "name": "GeneratorFunction",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/GeneratorFunction",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~GeneratorFunction",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 56,
+    "kind": "external",
+    "name": "Reflect",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Reflect",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 57,
+    "kind": "external",
+    "name": "Proxy",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Proxy",
+    "access": null,
+    "description": "",
+    "lineNumber": 193,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 59,
+    "kind": "external",
+    "name": "CanvasRenderingContext2D",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~CanvasRenderingContext2D",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 60,
+    "kind": "external",
+    "name": "DocumentFragment",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~DocumentFragment",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 61,
+    "kind": "external",
+    "name": "Element",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Element",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~Element",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 62,
+    "kind": "external",
+    "name": "Event",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Event",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~Event",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 63,
+    "kind": "external",
+    "name": "Node",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Node",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~Node",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 64,
+    "kind": "external",
+    "name": "NodeList",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/NodeList",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~NodeList",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 65,
+    "kind": "external",
+    "name": "XMLHttpRequest",
+    "externalLink": "https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~XMLHttpRequest",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 66,
+    "kind": "external",
+    "name": "AudioContext",
+    "externalLink": "https://developer.mozilla.org/en/docs/Web/API/AudioContext",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~AudioContext",
+    "access": null,
+    "description": "",
+    "lineNumber": 34,
+    "builtinExternal": true
+  }
+]

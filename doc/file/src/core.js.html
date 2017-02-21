@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">src/core.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/zbm2001/datajs" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getCultureInfo">getCultureInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-CultureInfos">CultureInfos</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/core.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {typeOf, assign} from &apos;z-utils/src&apos;;
+import {default as i18n, getCultureInfo} from &apos;./i18n&apos;;
+
+var ry = /y+/,
+  rM = /M+/,
+  rd = /d+/,
+  rh = /h+/,
+  rm = /m+/,
+  rs = /s+/,
+  rS = /S+/,
+
+  ry_g = /y+/g,
+  rM_g = /M+/g,
+  rd_g = /d+/g,
+  rh_g = /h+/g,
+  rm_g = /m+/g,
+  rs_g = /s+/g,
+  rS_g = /S+/g,
+
+  rMdhms_g = /[Mdhms]+/g,
+  rDigits_g = /\d+/g,
+  rPeriod = /^(this|last|past|next)\s*([0-9]*)\s*(days?|weeks?|months?|quarters?|years?|century|centuries)$/i,
+
+  // &#x6BCF;&#x6708;&#x5929;&#x6570;&#xFF08;&#x5E73;&#x5E74;&#xFF09;
+  perMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+  // &#x6BCF;&#x5B63;&#x5EA6;&#x5929;&#x6570;&#xFF08;&#x5E73;&#x5E74;&#xFF09;
+  perQuarterDays = [90, 91, 92, 92];
+
+Date.i18n = i18n;
+
+// &#x6269;&#x5C55;&#x65E5;&#x671F;&#x7C7B;&#x7684;&#x539F;&#x578B;&#x65B9;&#x6CD5;
+assign(Date.prototype, {
+
+  /**
+   * &#x8BBE;&#x7F6E;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x65F6;&#x95F4;&#x4E3A; 00:00:00 000
+   * @returns {number} &#x5F53;&#x524D;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6BEB;&#x79D2;&#x6570;
+   */
+  setTimeToFirst: function() {
+    return this.setHours(0, 0, 0, 0);
+  },
+
+  /**
+   * &#x8BBE;&#x7F6E;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x65F6;&#x95F4;&#x4E3A; 23:59:59 999
+   * @returns {number} &#x5F53;&#x524D;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6BEB;&#x79D2;&#x6570;
+   */
+  setTimeToLast: function() {
+    return this.setHours(23, 59, 59, 999);
+  },
+
+  /**
+   * &#x8BBE;&#x7F6E;&#x65F6;&#x95F4;&#x4E0E;&#x76EE;&#x6807;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x65F6;&#x95F4;&#x4E00;&#x81F4; hh:mm:ss SSS
+   * @param {Date} date
+   * @returns {number} &#x5F53;&#x524D;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6BEB;&#x79D2;&#x6570;
+   */
+  setTimeByDate: function(date) {
+    return this.setHours(date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
+  },
+
+  /**
+   * &#x8BBE;&#x7F6E;&#x65F6;&#x95F4;&#x4E0E;&#x5F53;&#x524D;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x65F6;&#x95F4;&#x4E00;&#x81F4; hh:mm:ss SSS
+   * @returns {number} &#x5F53;&#x524D;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6BEB;&#x79D2;&#x6570;
+   */
+  setTimeByNow: function() {
+    return this.setTimeByDate(new Date());
+  },
+
+  /**
+   * &#x4E0E;&#x53E6;&#x4E00;&#x4E2A;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x6BD4;&#x8F83;&#x6BEB;&#x79D2;&#x6570;&#x5927;&#x5C0F;
+   * @param {Date} date
+   * @returns {number} range{-1,0,1}
+   */
+  compareTo: function(date) {
+    if (Date.isDate(date)) {
+      return this &lt; date ? -1 : this &gt; date ? 1 : 0;
+    }
+    throw new TypeError(date + &quot; is not a Date object&quot;);
+  },
+
+  /**
+   * &#x5224;&#x65AD;&#x4E0E;&#x53E6;&#x4E00;&#x4E2A;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6BEB;&#x79D2;&#x6570;&#x4E00;&#x81F4;
+   * @param {Date} date
+   * @returns {Boolean}
+   */
+  equals: function(date) {
+    return this.compareTo(date) === 0;
+  },
+
+  /**
+   * &#x5224;&#x65AD;&#x6BD4;&#x53E6;&#x4E00;&#x4E2A;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6BEB;&#x79D2;&#x6570;&#x5C0F;
+   * @param {Date} date
+   * @returns {Boolean}
+   */
+  isBefore: function(date) {
+    return this.compareTo(date) &lt; 0;
+  },
+
+  /**
+   * &#x5224;&#x65AD;&#x6BD4;&#x53E6;&#x4E00;&#x4E2A;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6BEB;&#x79D2;&#x6570;&#x5927;
+   * @param {Date} date
+   * @returns {Boolean}
+   */
+  isAfter: function(date) {
+    return this.compareTo(date) &gt; 0;
+  },
+
+  /**
+   * &#x5224;&#x65AD;&#x5728;&#x67D0;&#x4E2A;&#x8D77;&#x6B62;&#x65F6;&#x95F4;&#x6BB5;&#x5185;
+   * @param {Date} start &#x8D77;&#x59CB;&#x65F6;&#x95F4;
+   * @param {Date} end &#x7ED3;&#x675F;&#x65F6;&#x95F4;
+   * @returns {Boolean}
+   */
+  between: function(start, end) {
+    return this.compareTo(start) &gt;= 0 &amp;&amp; this.compareTo(end) &lt;= 0;
+  },
+
+  /**
+   * &#x590D;&#x5236;&#x4E00;&#x4E2A;&#x65E5;&#x671F;&#x5BF9;&#x8C61;
+   * @returns {Date}
+   */
+  clone: function() {
+    return new Date(this.getTime());
+  },
+
+  /**
+   * &#x589E;&#x52A0;&#x65E5;&#x671F;&#x7684;&#x6BEB;&#x79D2;&#x6570;
+   * @param {Number} number [Required]
+   * @return {Date} this
+   */
+  addMilliseconds: function(number) {
+    this.setMilliseconds(this.getMilliseconds() + number * 1);
+    return this;
+  },
+
+  /**
+   * &#x589E;&#x52A0;&#x65E5;&#x671F;&#x7684;&#x79D2;&#x6570;
+   * @param {Number} number [Required]
+   * @return {Date} this
+   */
+  addSeconds: function(number) {
+    return this.addMilliseconds(number * 1000);
+  },
+
+  /**
+   * &#x589E;&#x52A0;&#x65E5;&#x671F;&#x7684;&#x5206;&#x949F;&#x6570;
+   * @param {Number} number [Required]
+   * @return {Date} this
+   */
+  addMinutes: function(number) {
+    return this.addMilliseconds(number * 60 * 1000);
+  },
+
+  /**
+   * &#x589E;&#x52A0;&#x65E5;&#x671F;&#x7684;&#x5C0F;&#x65F6;&#x6570;
+   * @param {Number} number [Required]
+   * @return {Date} this
+   */
+  addHours: function(number) {
+    return this.addMilliseconds(number * 60 * 60 * 1000);
+  },
+
+  /**
+   * &#x589E;&#x52A0;&#x65E5;&#x671F;&#x7684;&#x5929;&#x6570;
+   * @param {Number} number [Required]
+   * @return {Date} this
+   */
+  addDays: function(number) {
+    this.setDate(this.getDate() + number * 1);
+    return this;
+  },
+
+  /**
+   * &#x589E;&#x52A0;&#x65E5;&#x671F;&#x7684;&#x5468;&#x6570;
+   * @param {Number} number [Required]
+   * @return {Date} this
+   */
+  addWeeks: function(number) {
+    return this.addDays(number * 7);
+  },
+
+  /**
+   * &#x589E;&#x52A0;&#x65E5;&#x671F;&#x7684;&#x6708;&#x4EFD;
+   * @param {Number} number [Required]
+   * @return {Date} this
+   */
+  addMonths: function(number) {
+    var n = this.getDate();
+    this.setDate(1);
+    this.setMonth(this.getMonth() + number * 1);
+    this.setDate(Math.min(n, this.getMonthDays()));
+    return this;
+  },
+
+  /**
+   * &#x589E;&#x52A0;&#x65E5;&#x671F;&#x7684;&#x5E74;&#x4EFD;
+   * @param {Number} number [Required]
+   * @return {Date} this
+   */
+  addYears: function(number) {
+    return this.addMonths(number * 12);
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x6708;&#x4EFD;&#x81EA;&#x7136;&#x6570;
+   * @returns {number} range{1,12}
+   */
+  getNaturalMonth: function() {
+    return this.getMonth() + 1;
+  },
+
+  /**
+   * &#x8BBE;&#x7F6E;&#x5F53;&#x524D;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6708;&#x4EFD;
+   * @param {number} month &#x6708;&#x4EFD;
+   * @returns {number} &#x5F53;&#x524D;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6BEB;&#x79D2;&#x6570;
+   */
+  setNaturalMonth: function(month) {
+    if (Date.validateNaturalMonth(month)) {
+      return this.setMonth(month - 1);
+    }
+    this.getTime();
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x5E74;&#x6BCF;&#x6708;&#x5929;&#x6570;&#x7684;&#x6570;&#x7EC4;
+   * @returns {Array.&lt;number&gt;} length{12} range{28,31}
+   */
+  getDaysPerMonth: function() {
+    var year = this.getFullYear(),
+      d = perMonthDays.slice();
+    (year % 4 || !(year % 400)) || (d[1] = 29);
+    return d;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x5E74;&#x6BCF;&#x5B63;&#x5EA6;&#x5929;&#x6570;&#x7684;&#x6570;&#x7EC4;
+   * @returns {Array.&lt;number&gt;} length{4} range{91,92}
+   */
+  getDaysPerQuarter: function() {
+    var year = this.getFullYear(),
+      d = perQuarterDays.slice();
+    (year % 4 || !(year % 400)) || (d[0] = 91);
+    return d;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x5E74;&#x5F53;&#x6708;&#x7684;&#x5929;&#x6570;
+   * @returns {number} range{28,31}
+   */
+  getMonthDays: function() {
+    var month = this.getMonth(),
+      year;
+    if (month !== 1) {
+      return perMonthDays[month];
+    }
+    year = this.getFullYear();
+    return year % 4 || !(year % 400) ? 28 : 29;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x5E74;&#x5F53;&#x5B63;&#x5EA6;&#x7684;&#x5929;&#x6570;
+   * @returns {number} range{91,92}
+   */
+  getQuarterDays: function() {
+    var quarter = this.getQuarter(),
+      year;
+    if (quarter !== 1) {
+      return perQuarterDays[quarter - 1];
+    }
+    year = this.getFullYear();
+    return year % 4 || !(year % 400) ? 90 : 91;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x5E74;&#x7684;&#x5929;&#x6570;
+   * @returns {number} range{365,366}
+   */
+  getYearDays: function() {
+    var year = this.getFullYear();
+    return year % 4 || !(year % 400) ? 365 : 366;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x4E16;&#x7EAA;&#x7684;&#x5929;&#x6570;
+   * @returns {number} range{36523,36524}
+   */
+  getCenturyDays: function() {
+    var days = 0,
+      year = this.getFullYear(),
+      startYear = parseInt(year / 100) * 100;
+
+    days += 100 * 365 + parseInt(99 / 4);
+    // &#x82E5;&#x672C;&#x4E16;&#x7EAA;&#x5143;&#x5E74;&#x4E3A;&#x95F0;&#x5E74;&#xFF0C;&#x518D;&#x52A0;&#x4E00;&#x5929;
+    !(startYear % 400) &amp;&amp; days++;
+
+    return days;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x5B63;&#x5EA6;&#x6570;
+   * @returns {number} range{1,4}
+   */
+  getQuarter: function() {
+    return parseInt((this.getMonth() + 3) / 3);
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x4E16;&#x7EAA;&#x6570;
+   * @returns {Number}
+   */
+  getCentury: function() {
+    var year = this.getFullYear();
+    return parseInt(year / 100);
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x5B63;&#x5EA6;&#x7684;&#x7B2C;&#x591A;&#x5C11;&#x5929;
+   * @returns {number} range{1,92}
+   */
+  getQuarterDate: function() {
+    var month = this.getMonth(),
+      days = month &amp;&amp; this.getDaysPerMonth().slice(parseInt(month / 3) * 3, month).reduce(function(a, b) {
+        return a + b;
+      }, 0);
+    return days + this.getDate();
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x5E74;&#x7684;&#x7B2C;&#x591A;&#x5C11;&#x5929;
+   * @returns {number} range{1,366}
+   */
+  getYearDate: function() {
+    var month = this.getMonth(),
+      days = month &amp;&amp; this.getDaysPerMonth().slice(0, month).reduce(function(a, b) {
+        return a + b;
+      }, 0);
+    return days + this.getDate();
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x4E2A;&#x4E16;&#x7EAA;&#x7684;&#x7B2C;&#x591A;&#x5C11;&#x5929;
+   * @returns {number} range{1,36524}
+   */
+  getCenturyDate: function() {
+    var date = this.getYearDate(),
+      year = this.getFullYear(),
+      startYear = parseInt(year / 100) * 100;
+
+    date += (year - startYear - 1) * 365 + parseInt((year - startYear) / 4);
+    // &#x82E5;&#x672C;&#x4E16;&#x7EAA;&#x5143;&#x5E74;&#x4E3A;&#x95F0;&#x5E74;&#xFF0C;&#x518D;&#x52A0;&#x4E00;&#x5929;
+    !(startYear % 400) &amp;&amp; date++;
+
+    return date;
+  },
+
+  /**
+   * &#x5224;&#x65AD;&#x5F53;&#x5E74;&#x662F;&#x5426;&#x4E3A;&#x95F0;&#x5E74;
+   * @returns {boolean}
+   */
+  isLeapYear: function() {
+    var year = this.getFullYear();
+    return !(year % 4 || !(year % 400));
+  },
+
+  /**
+   * &#x5224;&#x65AD;&#x5F53;&#x5E74;&#x662F;&#x5426;&#x4E3A;&#x5E73;&#x5E74;
+   * @returns {boolean}
+   */
+  isAverageYear: function() {
+    var year = this.getFullYear();
+    return !!(year % 4) || !(year % 400);
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x4E2A;&#x65F6;&#x95F4;&#x8DE8;&#x5EA6;&#x91CF;&#x8BCD;&#x6BB5;&#x7684;&#x7B2C;&#x591A;&#x5C11;&#x5929;
+   * @param {string} classifier
+   * @returns {number} range{1,36524}
+   */
+  getDateByClassifier: function(classifier) {
+    switch (classifier) {
+      case &quot;day&quot;:
+        return 1;
+      case &quot;week&quot;:
+        return this.getDay();
+      case &quot;month&quot;:
+        return this.getDate();
+      case &quot;quarter&quot;:
+        return this.getQuarterDate();
+      case &quot;year&quot;:
+        return this.getYearDate();
+      case &quot;century&quot;:
+        return this.getCenturyDate();
+      default:
+        return 1;
+    }
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x4E2A;&#x65F6;&#x95F4;&#x8DE8;&#x5EA6;&#x91CF;&#x8BCD;&#x6BB5;&#x7684;&#x5269;&#x4F59;&#x5929;&#x6570;
+   * @param {string} classifier
+   * @returns {number}
+   */
+  getRestDaysByClassifier: function(classifier) {
+    switch (classifier) {
+      case &quot;day&quot;:
+        return 0;
+      case &quot;week&quot;:
+        return 6 - this.getDay();
+      case &quot;month&quot;:
+        return this.getMonthDays() - this.getDate();
+      case &quot;quarter&quot;:
+        return this.getQuarterDays() - this.getQuarterDate();
+      case &quot;year&quot;:
+        return this.getYearDays() - this.getYearDate();
+      case &quot;century&quot;:
+        return this.getCenturyDays() - this.getCenturyDate();
+      default:
+        return 0;
+    }
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5F53;&#x4E2A;&#x65F6;&#x95F4;&#x8DE8;&#x5EA6;&#x91CF;&#x8BCD;&#x6BB5;&#x7684;&#x5929;&#x6570;
+   * @param {string} classifier
+   * @returns {number} range{1, 36524}
+   */
+  getDaysByClassifier: function(classifier) {
+    switch (classifier) {
+      case &quot;day&quot;:
+        return 1;
+      case &quot;week&quot;:
+        return 7;
+      case &quot;month&quot;:
+        return this.getMonthDays();
+      case &quot;quarter&quot;:
+        return this.getQuarterDays();
+      case &quot;year&quot;:
+        return this.getYearDays();
+      case &quot;century&quot;:
+        return this.getCenturyDays();
+      default:
+        return 1;
+    }
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x8FC7;&#x53BB;&#x591A;&#x4E2A;&#x65F6;&#x95F4;&#x8DE8;&#x5EA6;&#x91CF;&#x8BCD;&#x6BB5;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x8DE8;&#x5EA6;&#x91CF;&#x8BCD;&#x6BB5;
+   * @param {string} classifier
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByPastClassifiers: function(classifier, number) {
+    switch (classifier) {
+      case &quot;day&quot;:
+        return number;
+      case &quot;week&quot;:
+        return 7 * number;
+      case &quot;month&quot;:
+        return this.getDaysByPastMonths(number);
+      case &quot;quarter&quot;:
+        return this.getDaysByPastQuarters(number);
+      case &quot;year&quot;:
+        return this.getDaysByPastYears(number);
+      case &quot;century&quot;:
+        return this.getDaysByPastCenturies(number);
+      default:
+        return number;
+    }
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x8FC7;&#x53BB;&#x6708;&#x6570;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x6708;&#x4EFD;
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByPastMonths: function(number) {
+    var month = this.getMonth() + 1,
+      year = this.getFullYear(),
+      days = 0;
+    for (; number &gt; 0; number--) {
+      if (--month &lt; 1) {
+        month = 12;
+        year--;
+      }
+      days += Date.getMonthDays(month, year);
+    }
+    return days;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x8FC7;&#x53BB;&#x5B63;&#x5EA6;&#x6570;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x5B63;&#x5EA6;
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByPastQuarters: function(number) {
+    var quarter = this.getQuarter(),
+      year = this.getFullYear(),
+      days = 0;
+    for (; number &gt; 0; number--) {
+      if (--quarter &lt; 1) {
+        quarter = 4;
+        year--;
+      }
+      days += Date.getQuarterDays(quarter, year);
+    }
+    return days;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x8FC7;&#x53BB;&#x5E74;&#x6570;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x5E74;&#x4EFD;
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByPastYears: function(number) {
+    var year = this.getFullYear(),
+      days = 0;
+    for (; number &gt; 0; number--) {
+      days += Date.getYearDays(--year);
+    }
+    return days;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x8FC7;&#x53BB;&#x4E16;&#x7EAA;&#x6570;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x4E16;&#x7EAA;
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByPastCenturies: function(number) {
+    var century = this.getCentury(),
+      days = 0;
+    for (; number &gt; 0; number--) {
+      days += Date.getCenturyDays(--century);
+    }
+    return days;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x8FC7;&#x53BB;&#x591A;&#x4E2A;&#x65F6;&#x95F4;&#x8DE8;&#x5EA6;&#x91CF;&#x8BCD;&#x6BB5;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x8DE8;&#x5EA6;&#x91CF;&#x8BCD;&#x6BB5;
+   * @param {string} classifier
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByNextClassifiers: function(classifier, number) {
+    switch (classifier) {
+      case &quot;day&quot;:
+        return number;
+      case &quot;week&quot;:
+        return 7 * number;
+      case &quot;month&quot;:
+        return this.getDaysByNextMonths(number);
+      case &quot;quarter&quot;:
+        return this.getDaysByNextQuarters(number);
+      case &quot;year&quot;:
+        return this.getDaysByNextYears(number);
+      case &quot;century&quot;:
+        return this.getDaysByNextCenturies(number);
+      default:
+        return number;
+    }
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5C06;&#x6765;&#x6708;&#x6570;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x6708;&#x4EFD;
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByNextMonths: function(number) {
+    var month = this.getMonth() + 1,
+      year = this.getFullYear(),
+      days = 0;
+    for (; number &gt; 0; number--) {
+      if (++month &gt; 12) {
+        month = 1;
+        year++;
+      }
+      days += Date.getMonthDays(month, year);
+    }
+    return days;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5C06;&#x6765;&#x5B63;&#x5EA6;&#x6570;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x5B63;&#x5EA6;
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByNextQuarters: function(number) {
+    var quarter = this.getQuarter(),
+      year = this.getFullYear(),
+      days = 0;
+    for (; number &gt; 0; number--) {
+      if (++quarter &gt; 4) {
+        quarter = 1;
+        year++;
+      }
+      days += Date.getQuarterDays(quarter, year);
+    }
+    return days;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5C06;&#x6765;&#x5E74;&#x6570;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x5E74;&#x4EFD;
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByNextYears: function(number) {
+    var year = this.getFullYear(),
+      days = 0;
+    for (; number &gt; 0; number--) {
+      days += Date.getYearDays(++year);
+    }
+    return days;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x5C06;&#x6765;&#x4E16;&#x7EAA;&#x6570;&#x7684;&#x5929;&#x6570;&#xFF0C;&#x4E0D;&#x5305;&#x542B;&#x5F53;&#x524D;&#x7684;&#x4E16;&#x7EAA;
+   * @param {number} number
+   * @returns {number}
+   */
+  getDaysByNextCenturies: function(number) {
+    var century = this.getCentury(),
+      days = 0;
+    for (; number &gt; 0; number--) {
+      days += Date.getCenturyDays(++century);
+    }
+    return days;
+  },
+
+  // &#x83B7;&#x53D6;&#x5F53;&#x5E74;&#x7B2C;&#x591A;&#x5C11;&#x5468;
+  getYearWeek: function() {
+
+  },
+
+  // &#x83B7;&#x53D6;&#x5F53;&#x5B63;&#x7B2C;&#x591A;&#x5C11;&#x5468;
+  getQuarterWeek: function() {
+
+  },
+
+  // &#x83B7;&#x53D6;&#x5F53;&#x6708;&#x7B2C;&#x591A;&#x5C11;&#x5468;
+  getMonthWeek: function() {
+
+  },
+
+  /**
+   * &#x901A;&#x8FC7;&#x4E00;&#x7EC4;&#x914D;&#x7F6E;&#x9879;&#x8BBE;&#x7F6E;&#x65F6;&#x95F4;
+   * @param {Object} config
+   * @returns {Object} this
+   */
+  set: function(config) {
+    if (Date.validateMillisecond(config.millisecond)) {
+      this.addMilliseconds(config.millisecond - this.getMilliseconds());
+    }
+
+    if (Date.validateSecond(config.second)) {
+      this.addSeconds(config.second - this.getSeconds());
+    }
+
+    if (Date.validateMinute(config.minute)) {
+      this.addMinutes(config.minute - this.getMinutes());
+    }
+
+    if (Date.validateHour(config.hour)) {
+      this.addHours(config.hour - this.getHours());
+    }
+
+    if (Date.validateMonth(config.month)) {
+      this.addMonths(config.month - this.getMonth());
+    }
+
+    if (Date.validateYear(config.year)) {
+      this.addYears(config.year - this.getFullYear());
+    }
+
+    /* day has to go last because you can&apos;t validate the day without first knowing the month */
+    if (Date.validateDay(config.day, this.getMonth(), this.getFullYear())) {
+      this.addDays(config.day - this.getDate());
+    }
+
+    if (config.timezone) {
+      this.setTimezone(config.timezone);
+    }
+
+    if (config.timezoneOffset) {
+      this.setTimezoneOffset(config.timezoneOffset);
+    }
+
+    if (config.week &amp;&amp; validate(config.week, 0, 53, &quot;week&quot;)) {
+      this.setWeek(config.week);
+    }
+
+    return this;
+  },
+
+  /**
+   * Get the offset from UTC of the current date.
+   * @return {String} The 4-character offset string prefixed with + or - (e.g. &quot;-0500&quot;)
+   */
+  getUTCOffset: function() {
+    var n = this.getTimezoneOffset() * -10 / 6,
+      r;
+    if (n &lt; 0) {
+      r = (n - 10000).toString();
+      return r.charAt(0) + r.substr(2);
+    } else {
+      r = (n + 10000).toString();
+      return &quot;+&quot; + r.substr(1);
+    }
+  },
+
+  /**
+   * Get the time zone abbreviation of the current date.
+   * @return {String} The abbreviated time zone name (e.g. &quot;EST&quot;)
+   */
+  getTimezone: function() {
+    return Date.getTimezoneAbbreviation(this.getUTCOffset());
+  },
+
+  /**
+   * Set the time zone abbreviation of the current date.
+   * @param {string} offset
+   * @return {String} The abbreviated time zone name (e.g. &quot;EST&quot;)
+   */
+  setTimezoneOffset: function(offset) {
+    // &#x8FD4;&#x56DE;&#x534F;&#x8C03;&#x901A;&#x7528;&#x65F6;&#x95F4;(UTC)&#x4E0E;&#x5F53;&#x524D;&#x4E3B;&#x673A;&#x65F6;&#x95F4;&#x4E4B;&#x95F4;&#x7684;&#x5206;&#x949F;&#x5DEE;&#x503C;
+    // &#x51FD;&#x6570;&#x7684;&#x8FD4;&#x56DE;&#x503C;&#x4E3A;Number&#x7C7B;&#x578B;&#xFF0C;&#x8FD4;&#x56DE;&#x5F53;&#x524D;&#x8BA1;&#x7B97;&#x673A;&#x4E0A;&#x7684;&#x65F6;&#x95F4;&#x548C;UTC&#x65F6;&#x95F4;&#x4E4B;&#x95F4;&#x76F8;&#x5DEE;&#x7684;&#x5206;&#x949F;&#x6570;&#x3002;
+    // &#x4E00;&#x822C;&#x800C;&#x8A00;&#xFF0C;&#x5982;&#x679C;&#x5F53;&#x5730;&#x65F6;&#x95F4;&#x65E9;&#x4E8E;UTC&#x65F6;&#x95F4;(&#x5728;UTC&#x65F6;&#x533A;&#x4EE5;&#x4E1C;&#xFF0C;&#x4F8B;&#x5982;&#x4E9A;&#x6D32;&#x5730;&#x533A;)&#xFF0C;&#x5219;&#x8FD4;&#x56DE;&#x503C;&#x4E3A;&#x8D1F;&#xFF1B;&#x5982;&#x679C;&#x5F53;&#x5730;&#x65F6;&#x95F4;&#x665A;&#x4E8E;UTC&#x65F6;&#x95F4;(&#x5728;UTC&#x65F6;&#x533A;&#x4EE5;&#x897F;&#xFF0C;&#x4F8B;&#x5982;&#x7F8E;&#x6D32;&#x5730;&#x533A;)&#xFF0C;&#x5219;&#x8FD4;&#x56DE;&#x503C;&#x4E3A;&#x6B63;&#x3002;
+    var here = this.getTimezoneOffset(),
+      there = Number(offset) * -6 / 10;
+    return this.addMinutes(there - here);
+  },
+
+  /**
+   * Set the time zone abbreviation of the current date.
+   * @param {string} offset
+   * @return {String} The abbreviated time zone name (e.g. &quot;EST&quot;)
+   */
+  setTimezone: function(offset) {
+    return this.setTimezoneOffset(Date.getTimezoneOffset(offset));
+  },
+
+  /**
+   * &#x8FD4;&#x56DE;&#x683C;&#x5F0F;&#x5316;&#x540E;&#x7684;&#x65E5;&#x671F;&#x683C;&#x5F0F;
+   * @param {string} format
+   * @returns {string}
+   */
+  format: function(format) {
+
+    format || (format = Date.FORMAT);
+
+    var date = this,
+      a = [
+        //[ry, &quot;getFullYear&quot;] //year
+        [rM, &quot;getNaturalMonth&quot;], //month + 1
+        [rd, &quot;getDate&quot;], //day
+        [rh, &quot;getHours&quot;], //hour
+        [rm, &quot;getMinutes&quot;], //minute
+        [rs, &quot;getSeconds&quot;] //second
+        //,[rS, &quot;getMilliseconds&quot;] //millisecond
+        //,[&quot;q&quot;, &quot;getQuarter&quot;]  //quarter
+      ],
+      i = 0,
+      l = a.length;
+
+    format = format.replace(ry, function(m) {
+      return (date.getFullYear() + &apos;&apos;).substr(-m.length);
+    });
+
+    for (; i &lt; l; i++) {
+      format = format.replace(a[i][0], function(m) {
+        var p = date[a[i][1]]();
+        return (p &gt; 9 || m.length &lt; 2 ? &apos;&apos; : &apos;0&apos;) + p;
+      });
+    }
+
+    format = format.replace(rS, function(m) {
+      var S = date.getMilliseconds();
+      return (S &gt; 99 || m.length &lt; 3 ? &apos;&apos; : &apos;0&apos;) + S;
+    });
+
+    format = format.replace(&apos;q&apos;, function(m) {
+      return parseInt((date.getMonth() + 3) / 3);
+    });
+
+    return format;
+  }
+
+});
+
+/**
+ * &#x9A8C;&#x8BC1;&#x4E0E;&#x65F6;&#x95F4;&#x76F8;&#x5173;&#x6570;&#x503C;&#x5408;&#x6CD5;&#x6027;
+ * @param {Number} n &#x9700;&#x8981;&#x9A8C;&#x8BC1;&#x6570;&#x503C;
+ * @param {Number} min &#x6307;&#x5B9A;&#x6570;&#x503C;&#x8303;&#x56F4;&#x7684;&#x6700;&#x5C0F;&#x503C;
+ * @param {Number} max &#x6307;&#x5B9A;&#x6570;&#x503C;&#x8303;&#x56F4;&#x7684;&#x6700;&#x5927;&#x503C;
+ * @param {String} name 
+ * @returns {Boolean}
+ */
+function validate(n, min, max, name) {
+  if (n == null) {
+    return false;
+  }
+  if (typeof n != &quot;number&quot;) {
+    throw new TypeError(n + &quot; is not a Number.&quot;);
+  } else if (n &lt; min || n &gt; max) {
+    throw new RangeError(n + &quot; is not a valid value for &quot; + name + &quot;.&quot;);
+  }
+  return true;
+}
+
+/**
+ * &#x89E3;&#x6790;&#x65F6;&#x6BB5;&#x7528;&#x8BED;&#xFF0C;&#x8FD4;&#x56DE;&#x8D77;&#x59CB;&#x548C;&#x7ED3;&#x675F;&#x4E24;&#x4E2A;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6570;&#x7EC4;
+ * @param {string} period
+ * @returns {Array.&lt;Date&gt;} length{2}
+ */
+function parse2DatesByPeriod(period) {
+
+  var now = new Date(),
+    start,
+    start0 = new Date(),
+    end,
+    end2 = new Date(),
+    diffStartDays = 0,
+    diffEndDays = 0,
+    classifier,
+    classifierPlural,
+    thisClassifierDays;
+
+  // &#x8BBE;&#x7F6E;&#x5F00;&#x59CB;&#x65F6;&#x95F4;&#x4E3A;&#x90A3;&#x5929;&#x7684; 0 &#x65F6;&#x8BA1;&#x8D77;
+  start0.setTimeToFirst();
+  start = start0;
+  // &#x8BBE;&#x7F6E;&#x7ED3;&#x675F;&#x65F6;&#x95F4;&#x4E3A;&#x90A3;&#x5929;&#x7684;&#x6700;&#x540E;&#x4E00;&#x6BEB;&#x79D2;&#x622A;&#x6B62;
+  end2.setTimeToLast();
+  end = end2;
+
+  switch (period) {
+    case &apos;today&apos;: // &#x4ECA;&#x5929;
+      diffStartDays = 0;
+      break;
+    case &apos;yesterday&apos;: // &#x6628;&#x5929;
+      diffStartDays = -1;
+      diffEndDays = -1;
+      break;
+    case &apos;thisWeek&apos;: // &#x672C;&#x5468;
+      diffStartDays = 1 - start.getDay();
+      break;
+    case &apos;lastWeek&apos;: // &#x4E0A;&#x5468;
+      diffEndDays = -end.getDay();
+      diffStartDays = diffEndDays + 1 - 7;
+      break;
+    case &apos;thisMonth&apos;: // &#x672C;&#x6708;
+      diffStartDays = 1 - start.getDate();
+      break;
+    case &apos;lastMonth&apos;: // &#x4E0A;&#x6708;
+      diffEndDays = -end.getDate();
+      now.setDate(0);
+      diffStartDays = diffEndDays + 1 - now.getMonthDays();
+      break;
+    case &apos;thisQuarter&apos;: // &#x672C;&#x5B63;&#x5EA6;
+      diffStartDays = 1 - start.getQuarterDate();
+      break;
+    case &apos;lastQuarter&apos;: // &#x4E0A;&#x5B63;&#x5EA6;
+      diffEndDays = -end.getQuarterDate();
+      now.setDate(diffEndDays + now.getDate());
+      diffStartDays = diffEndDays + 1 - now.getQuarterDays();
+      break;
+    case &apos;thisYear&apos;: // &#x672C;&#x5E74;
+      diffStartDays = 1 - start.getYearDate();
+      break;
+    case &apos;lastYear&apos;: // &#x4E0A;&#x5E74;
+      diffEndDays = -end.getYearDate();
+      now.setFullYear(now.getFullYear() - 1);
+      diffStartDays = diffEndDays + 1 - now.getYearDays();
+      break;
+    default:
+      // last7days, last30days, last90days, last365days...
+      // last5months, last3Quarter, last2years, last1centuries...
+      // past10days, past4months...
+      if (rPeriod.test(period) &amp;&amp; (number = parseInt(RegExp.$2)) &gt; 0) {
+        classifierPlural = RegExp.$3;
+        if (classifier = Date.pluralClassifiers[classifierPlural]) {
+
+          switch (RegExp.$1) {
+            // last &#x8868;&#x793A;&#x6700;&#x8FD1;&#x7684;&#x5929;&#x3001;&#x5468;&#x3001;&#x6708;&#x3001;&#x5B63;&#x5EA6;&#x3001;&#x5E74;&#x3001;&#x4E16;&#x7EAA;&#x6570;&#xFF0C;&#x5206;&#x522B;&#x5BF9;&#x5E94;&#x5305;&#x542B;&#x4ECA;&#x5929;&#x3001;&#x672C;&#x5468;&#x3001;&#x672C;&#x6708;&#x3001;&#x672C;&#x5B63;&#x5EA6;&#x3001;&#x672C;&#x5E74;&#x3001;&#x672C;&#x4E16;&#x7EAA;
+            case &apos;last&apos;:
+              diffStartDays = -now.getDaysByPastClassifiers(classifier, number) + 1;
+              break;
+              // past &#x8868;&#x793A;&#x8FC7;&#x53BB;&#x7684;&#x5929;&#x3001;&#x5468;&#x3001;&#x6708;&#x3001;&#x5B63;&#x5EA6;&#x3001;&#x5E74;&#x3001;&#x4E16;&#x7EAA;&#x6570;&#xFF0C;&#x5206;&#x522B;&#x5BF9;&#x5E94;&#x4E0D;&#x5305;&#x542B;&#x4ECA;&#x5929;&#x3001;&#x672C;&#x5468;&#x3001;&#x672C;&#x6708;&#x3001;&#x672C;&#x5B63;&#x5EA6;&#x3001;&#x672C;&#x5E74;&#x3001;&#x672C;&#x4E16;&#x7EAA;
+            case &apos;past&apos;:
+              diffStartDays = -now.getDaysByPastClassifiers(classifier, number);
+              thisClassifierDays = now.getDateByClassifier(classifier, number);
+              diffStartDays -= thisClassifierDays - 1;
+              diffEndDays -= thisClassifierDays;
+              break;
+              // past &#x8868;&#x793A;&#x5C06;&#x6765;&#x7684;&#x5929;&#x3001;&#x5468;&#x3001;&#x6708;&#x3001;&#x5B63;&#x5EA6;&#x3001;&#x5E74;&#x3001;&#x4E16;&#x7EAA;&#x6570;&#xFF0C;&#x5206;&#x522B;&#x5BF9;&#x5E94;&#x4E0D;&#x5305;&#x542B;&#x4ECA;&#x5929;&#x3001;&#x672C;&#x5468;&#x3001;&#x672C;&#x6708;&#x3001;&#x672C;&#x5B63;&#x5EA6;&#x3001;&#x672C;&#x5E74;&#x3001;&#x672C;&#x4E16;&#x7EAA;
+            case &apos;next&apos;:
+              diffEndDays = now.getDaysByNextClassifiers(classifier, number);
+              thisClassifierDays = now.getRestDaysByClassifier(classifier, number);
+              diffStartDays += thisClassifierDays + 1;
+              diffEndDays += thisClassifierDays;
+              break;
+            default:
+          }
+        }
+      }
+      throw new Error(&apos;Unknown time period definition: &apos; + period);
+  }
+  start.setDate(start.getDate() + diffStartDays);
+  end.setDate(end.getDate() + diffEndDays);
+
+  return [start, end];
+}
+
+// &#x6269;&#x5C55;&#x9759;&#x6001;&#x65B9;&#x6CD5;
+export default assign(Date, {
+
+  /**
+   * &#x5224;&#x65AD;&#x662F;&#x5426;&#x4E3A;&#x65E5;&#x671F;&#x5BF9;&#x8C61;
+   * @param {Date} date
+   * @returns {boolean}
+   */
+  isDate: function(date) {
+    return typeOf(date) === &apos;[object Date]&apos;;
+  },
+
+
+  /**
+   * &#x9A8C;&#x8BC1;&#x6BCF;&#x79D2;&#x7684;&#x6BEB;&#x79D2;&#x6570;&#x503C;&#x8303;&#x56F4;
+   * @param {Number} range{0, 999}
+   * @return {Boolean}
+   */
+  validateMillisecond: function(value) {
+    return validate(value, 0, 999, &quot;millisecond&quot;);
+  },
+
+  /**
+   * &#x9A8C;&#x8BC1;&#x6BCF;&#x5206;&#x949F;&#x7684;&#x79D2;&#x6570;&#x503C;&#x8303;&#x56F4;
+   * @param {Number} range{0, 59}
+   * @return {Boolean}
+   */
+  validateSecond: function(value) {
+    return validate(value, 0, 59, &quot;second&quot;);
+  },
+
+  /**
+   * &#x9A8C;&#x8BC1;&#x6BCF;&#x5C0F;&#x65F6;&#x7684;&#x5206;&#x949F;&#x6570;&#x503C;&#x8303;&#x56F4;
+   * @param {Number} range{0, 59}
+   * @return {Boolean}
+   */
+  validateMinute: function(value) {
+    return validate(value, 0, 59, &quot;minute&quot;);
+  },
+
+  /**
+   * &#x9A8C;&#x8BC1;&#x6BCF;&#x5929;&#x7684;&#x5C0F;&#x65F6;&#x6570;&#x503C;&#x8303;&#x56F4;
+   * @param {Number} range{0, 23}
+   * @return {Boolean}
+   */
+  validateHour: function(value) {
+    return validate(value, 0, 23, &quot;hour&quot;);
+  },
+
+  /**
+   * &#x9A8C;&#x8BC1;&#x6BCF;&#x5468;&#x7684;&#x5929;&#x6570;&#x503C;&#x8303;&#x56F4;
+   * @param {Number} range{0, 6}
+   * @return {Boolean}
+   */
+  validateDay: function(value) {
+    return validate(value, 0, 6, &quot;day&quot;);
+  },
+
+  /**
+   * &#x9A8C;&#x8BC1;&#x6BCF;&#x6708;&#x5929;&#x6570;&#x503C;&#x8303;&#x56F4;
+   * @param {Number} range{0, 31}
+   * @return {Boolean}
+   */
+  validateDate: function(value, month, year) {
+    return validate(value, 1, Date.getMonthDays(month, year), &quot;date&quot;);
+  },
+
+  /**
+   * &#x9A8C;&#x8BC1;&#x6BCF;&#x5E74;&#x7684;&#x6708;&#x4EFD;&#x6570;&#x503C;&#x8303;&#x56F4;
+   * @param {Number} range{0, 11}
+   * @return {Boolean}
+   */
+  validateMonth: function(value) {
+    return validate(value, 0, 11, &quot;month&quot;);
+  },
+
+  /**
+   * &#x9A8C;&#x8BC1;&#x6BCF;&#x5E74;&#x7684;&#x81EA;&#x7136;&#x6708;&#x4EFD;&#x6570;&#x503C;&#x8303;&#x56F4;
+   * @param {Number} range{1, 12}
+   * @return {Boolean}
+   */
+  validateNaturalMonth: function(value) {
+    return validate(value, 1, 12, &quot;natural month&quot;);
+  },
+
+  /**
+   * &#x9A8C;&#x8BC1;&#x5E74;&#x4EFD;&#x6570;&#x503C;&#x8303;&#x56F4;
+   * @param {Number} range{0, 9999}
+   * @return {Boolean}
+   */
+  validateYear: function(value) {
+    return validate(value, 0, 9999, &quot;year&quot;);
+  },
+
+  /**
+   * &#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x5F53;&#x5929;&#x7684;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#xFF0C;&#x65F6;&#x95F4;&#x4E3A; 00:00:00 000
+   * @returns {Date}
+   */
+  today: function() {
+    var date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x67D0;&#x5E74;&#x6BCF;&#x6708;&#x5929;&#x6570;&#x7684;&#x6570;&#x7EC4;
+   * @param {number} year &#x5E74;&#x4EFD;
+   * @returns {Array.&lt;number&gt;}
+   */
+  getDaysPerMonth: function(year) {
+    var d = perMonthDays.slice();
+    Date.isLeapYear(year) &amp;&amp; (d[1] = 29);
+    return d;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x67D0;&#x5E74;&#x67D0;&#x81EA;&#x7136;&#x6708;&#x4EFD;&#x7684;&#x5929;&#x6570;
+   * @param {number} month &#x6708;&#x4EFD;
+   * @param {number} year &#x5E74;&#x4EFD;
+   * @returns {number} range{28, 31}
+   */
+  getMonthDays: function(month, year) {
+    return month !== 2 ? perMonthDays[month - 1] : year % 4 || !(year % 400) ? 28 : 29;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x67D0;&#x5E74;&#x67D0;&#x6708;&#x4EFD;&#x7684;&#x5929;&#x6570;
+   * @param {number} month &#x6708;&#x4EFD;
+   * @param {number} year &#x5E74;&#x4EFD;
+   * @returns {number} range{28, 31}
+   */
+  getNaturalMonthDays: function(month, year) {
+    return month !== 1 ? perMonthDays[month] : year % 4 || !(year % 400) ? 28 : 29;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x67D0;&#x5E74;&#x67D0;&#x5B63;&#x5EA6;&#x7684;&#x5929;&#x6570;
+   * @param {number} quarter &#x5B63;&#x5EA6;
+   * @param {number} year &#x5E74;&#x4EFD;
+   * @returns {number} range{90, 92}
+   */
+  getQuarterDays: function(quarter, year) {
+    return quarter !== 1 ? perQuarterDays[quarter - 1] : year % 4 || !(year % 400) ? 90 : 91;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x67D0;&#x5E74;&#x4EFD;&#x7684;&#x5929;&#x6570;
+   * @param {number} year &#x5E74;&#x4EFD;
+   * @returns {number} range{365,366}
+   */
+  getYearDays: function(year) {
+    return year % 4 || !(year % 400) ? 365 : 366;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x67D0;&#x4E16;&#x7EAA;&#x7684;&#x5929;&#x6570;
+   * @param {number} century &#x4E16;&#x7EAA;
+   * @returns {number} range{36523,36524}
+   */
+  getCenturyDays: function(century) {
+    var days = 0,
+      startYear = (Math.abs(century) - 1) * 100;
+
+    days += (100) * 365 + parseInt(99 / 4);
+    // &#x82E5;&#x672C;&#x4E16;&#x7EAA;&#x5143;&#x5E74;&#x4E3A;&#x95F0;&#x5E74;&#xFF0C;&#x518D;&#x52A0;&#x4E00;&#x5929;
+    !(startYear % 400) &amp;&amp; days++;
+
+    return days;
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x67D0;&#x5E74;&#x4EFD;&#x6240;&#x5C5E;&#x4E16;&#x7EAA;&#x7684;&#x5929;&#x6570;
+   * @param {number} year &#x5E74;&#x4EFD;
+   * @returns {number} range{36523,36524}
+   */
+  getCenturyDaysByYear: function(year) {
+    var century = Date.getCentury(year);
+    return Date.getCenturyDays(century);
+  },
+
+  /**
+   * &#x83B7;&#x53D6;&#x67D0;&#x5E74;&#x4EFD;&#x6240;&#x5C5E;&#x7684;&#x4E16;&#x7EAA;&#x6570;
+   * @param {number} year
+   * @returns {number}
+   */
+  getCentury: function(year) {
+    return parseInt(year / 100) + (year &lt; 0 ? 1 : -1);
+  },
+
+  /**
+   * &#x5224;&#x65AD;&#x5E74;&#x4EFD;&#x662F;&#x5426;&#x4E3A;&#x95F0;&#x5E74;
+   * @param {number} year &#x5E74;&#x4EFD;
+   * @returns {boolean}
+   */
+  isLeapYear: function(year) {
+    return !(year % 4 || !(year % 400));
+  },
+
+  /**
+   * &#x5224;&#x65AD;&#x5E74;&#x4EFD;&#x662F;&#x5426;&#x4E3A;&#x5E73;&#x5E74;
+   * @param {number} year &#x5E74;&#x4EFD;
+   * @returns {boolean}
+   */
+  isAverageYear: function(year) {
+    return !!(year % 4) || !(year % 400);
+  },
+
+  /**
+   * &#x89E3;&#x6790;&#x683C;&#x5F0F;&#x5316;&#x7684;&#x65E5;&#x671F;&#xFF0C;&#x8FD4;&#x56DE;&#x76F8;&#x5E94;&#x7684;&#x65E5;&#x671F;&#x5BF9;&#x8C61;
+   * @param {string} time &apos;2012-3-13 11:11:11 111&apos; | &apos;2012-3-13T11:11:11.111Z&apos; | &apos;2012-3-13&apos; | &apos;3/13/2012&apos; | ...
+   * @param {string} format  &apos;yyyy-MM-dd hh:mm:ss SSS&apos; | &apos;yyyy-MM-ddThh:mm:ss.SSSZ&apos; |  &apos;yyyy-MM-dd&apos; | &apos;MM/dd/yyyy&apos; | ...
+   * @returns {Date}
+   */
+  parse2Date: function(time, format) {
+    // &#x82E5;&#x4E3A;&#x6BEB;&#x79D2;&#x6570;
+    if (typeof time === &apos;number&apos;) {
+      return new Date(time);
+    }
+    time = String(time);
+
+    // &#x82E5;&#x80FD;&#x6B63;&#x786E;&#x89E3;&#x6790;&#xFF0C;&#x8FD4;&#x56DE;&#x8BE5;&#x65F6;&#x95F4;&#x7684;&#x6BEB;&#x79D2;&#x6570;
+    // &#x82E5;&#x4E0D;&#x80FD;&#x6B63;&#x786E;&#x89E3;&#x6790;&#xFF0C;&#x8FD4;&#x56DE;NaN
+    var M = Date.parse(time);
+    if (M === M) {
+      return new Date(M);
+    }
+
+    format = format ? format.replace(rMdhms_g, function(m) {
+      return (m = m.charAt(0)) + m;
+    }) : Date.FORMAT;
+
+    time = time.replace(rDigits_g, function(m) {
+      return m.length &lt; 2 ? &apos;0&apos; + m : m;
+    });
+
+    var r, m, n,
+      d = new Date,
+      a = [
+        [ry_g, &quot;setFullYear&quot;] //year
+        ,
+        [rM_g, &quot;setRealMonth&quot;] //month + 1
+        ,
+        [rd_g, &quot;setDate&quot;] //day
+        ,
+        [rh_g, &quot;setHours&quot;] //hour
+        ,
+        [rm_g, &quot;setMinutes&quot;] //minute
+        ,
+        [rs_g, &quot;setSeconds&quot;] //second
+        ,
+        [rS_g, &quot;setMilliseconds&quot;] //millisecond
+      ],
+      i = -1,
+      l = a.length;
+
+    while (++i &lt; l) {
+      r = a[i][0];
+      m = a[i][1];
+      d[m](r.test(format) ? parseInt(time.slice(r.lastIndex - RegExp.lastMatch.length, r.lastIndex)) || 0 : 0);
+      r.lastIndex = 0;
+    }
+    return d;
+  },
+
+  /**
+   * &#x89E3;&#x6790;&#x65F6;&#x6BB5;&#x7528;&#x8BED;&#xFF0C;&#x8FD4;&#x56DE;&#x8D77;&#x59CB;&#x548C;&#x7ED3;&#x675F;&#x4E24;&#x4E2A;&#x65F6;&#x95F4;&#x683C;&#x5F0F;&#x5B57;&#x7B26;&#x4E32;&#x7684;&#x6570;&#x7EC4;
+   * @param {string} period
+   * @param {string} format
+   * @returns {Array.&lt;string&gt;}
+   */
+  parse2DateFormatsByPeriod: function(period, format) {
+    var dates = parse2DatesByPeriod(period);
+    format || (format = Date.FORMAT);
+    return [
+      dates[0].format(format),
+      dates[1].format(format)
+    ];
+  },
+
+  /**
+   * &#x89E3;&#x6790;&#x65F6;&#x6BB5;&#x7528;&#x8BED;&#xFF0C;&#x8FD4;&#x56DE;&#x8D77;&#x59CB;&#x548C;&#x7ED3;&#x675F;&#x4E24;&#x4E2A;&#x65E5;&#x671F;&#x5BF9;&#x8C61;&#x7684;&#x6570;&#x7EC4;
+   * @param {string} period
+   * @returns {Array.&lt;Date&gt;}
+   */
+  parse2DateObjectsByPeriod: function(period) {
+    return parse2DatesByPeriod(period);
+  },
+
+  /**
+   * &#x6839;&#x636E;&#x65F6;&#x533A;&#x7684;&#x504F;&#x79FB;&#x91CF;&#xFF08;&#x5B57;&#x7B26;&#x4E32;&#x8868;&#x8FF0;&#xFF09;&#x83B7;&#x53D6;&#x65F6;&#x533A;&#x7684;&#x7F29;&#x5199;&#x540D;
+   * @param {String} offset The 4-character offset string prefixed with + or - (e.g. &quot;-0500&quot;)
+   * @returns {String} &#x5982;&#xFF1A;UTC|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT
+   */
+  getTimezoneAbbreviation: function(offset) {
+    var CultureInfo = getCultureInfo(),
+      timezones = CultureInfo.timezones;
+    for (let i = 0, l = timezones.length; i &lt; l; i++) {
+      if (timezones[i].offset === offset) {
+        return timezones[i].name;
+      }
+    }
+    return null;
+  },
+
+  /**
+   * &#x6839;&#x636E;&#x65F6;&#x533A;&#x7684;&#x7F29;&#x5199;&#x540D;&#x83B7;&#x53D6;&#x65F6;&#x533A;&#x7684;&#x504F;&#x79FB;&#x91CF;&#xFF08;&#x5B57;&#x7B26;&#x4E32;&#x8868;&#x8FF0;&#xFF09;
+   * @param {String} name &#x5982;&#xFF1A;UTC|GMT|EST|EDT|CST|CDT|MST|MDT|PST|PDT
+   * @returns {String} The 4-character offset string prefixed with + or - (e.g. &quot;-0500&quot;)
+   */
+  getTimezoneOffset: function(name) {
+    var CultureInfo = getCultureInfo(),
+      timezones = CultureInfo.timezones;
+    for (let i = 0, l = timezones.length; i &lt; l; i++) {
+      if (timezones[i].name === name.toUpperCase()) {
+        return timezones[i].offset;
+      }
+    }
+    return null;
+  },
+
+  FORMAT: &apos;yyyy-MM-dd hh:mm:ss SSS&apos;,
+  FORMAT_DATE: &apos;yyyy-MM-dd&apos;,
+  FORMAT_DATETIME: &apos;yyyy-MM-dd hh:mm:ss&apos;,
+
+  UTC_FORMAT: &apos;yyyy-MM-ddThh:mm:ss.SSSZ&apos;,
+
+  // Hash&#x8868;&#xFF1A;&#x65F6;&#x95F4;&#x91CF;&#x8BCD;&#x590D;&#x6570;&#x8BCD;&#x5BF9;&#x5E94;&#x539F;&#x8BCD;
+  // &#x6BEB;&#x79D2;&#x3001;&#x79D2;&#x3001;&#x5206;&#x949F;&#x3001;&#x5C0F;&#x65F6;&#x3001;&#x5929;&#x3001;&#x5468;&#x3001;&#x6708;&#x3001;&#x5B63;&#x5EA6;&#x3001;&#x5E74;&#x3001;&#x4E16;&#x7EAA;
+  pluralClassifiers: {
+    milliseconds: &quot;millisecond&quot;,
+    seconds: &quot;second&quot;,
+    minutes: &quot;minute&quot;,
+    hours: &quot;hour&quot;,
+    days: &quot;day&quot;,
+    weeks: &quot;week&quot;,
+    months: &quot;month&quot;,
+    quarters: &quot;quarter&quot;,
+    years: &quot;year&quot;,
+    centuries: &quot;century&quot;
+  },
+
+  // &#x5339;&#x914D;&#x65F6;&#x6BB5;&#x8BED;&#x53E5;&#x7684;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;
+  rPeriod: rPeriod
+
+})</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
