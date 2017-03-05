@@ -3,9 +3,11 @@ logs
 *.log
 npm-debug.log*
 
+# esdoc
+.esdoc.json
 doc/
-node_modules/
+
 dist/
+node_modules/
 .project
 .idea
-.esdoc.json

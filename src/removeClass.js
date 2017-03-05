@@ -1,6 +1,6 @@
 import {rSpace} from './regExps';
 import regClass from './regClass';
-import {typeOf} from 'z-utils/src';
+import {typeOf} from 'z-utils';
 
 
 /**
