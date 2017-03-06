@@ -33,3 +33,23 @@ export {
   toggleClass
 
 }
+
+export default {
+
+  addClass,
+  ancestor,
+  ancestorAll,
+  hasClass,
+  iiancestor,
+  iiancestorAll,
+  matches,
+  presetAjax,
+  rectCoord,
+  regClass,
+  regExps,
+  removeClass,
+  replaceClass,
+  swapClass,
+  toggleClass
+
+}

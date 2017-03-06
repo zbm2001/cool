@@ -516,6 +516,27 @@ function toggleClass(elem, toggledClass, matchAll) {
   return 1;
 }
 
+var core = {
+
+  addClass: addClass,
+  ancestor: ancestor,
+  ancestorAll: ancestorAll,
+  hasClass: hasClass,
+  iiancestor: iiancestor,
+  iiancestorAll: iiancestorAll,
+  matches: matches,
+  presetAjax: presetAjax,
+  rectCoord: rectCoord,
+  regClass: regClass,
+  regExps: regExps,
+  removeClass: removeClass,
+  replaceClass: replaceClass,
+  swapClass: swapClass,
+  toggleClass: toggleClass
+
+};
+
+exports['default'] = core;
 exports.addClass = addClass;
 exports.ancestor = ancestor;
 exports.ancestorAll = ancestorAll;
