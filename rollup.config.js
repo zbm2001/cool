@@ -58,7 +58,7 @@ module.exports = {
   ],
   banner: banner,
   // format: 'iife', // cjs amd es6 umd iife
-  moduleName: 'cool', // umd 或 iife 模式下，若入口文件含 export，必须加上该属性
+  moduleName: 'Cool', // umd 或 iife 模式下，若入口文件含 export，必须加上该属性
   // dest: 'cool.js', // 输出文件
   // sourceMap: false   // 调试编译
 }

@@ -4,14 +4,29 @@
 npm i z-cool
 
 ## 组件接口
-对jquery原生对象的原型和静态方法做扩展
+一组DOM操作的方法
+可对jquery原生对象的原型和静态方法做扩展
 
-### jquery原型方法和属性
+### Cool原型方法和属性
 
 
 
-### jquery静态方法和属性
-
+### Cool静态方法和属性
+Cool.addClass,
+Cool.ancestor,
+Cool.ancestorAll,
+Cool.hasClass,
+Cool.iiancestor,
+Cool.iiancestorAll,
+Cool.matches,
+Cool.presetAjax,
+Cool.rectCoord,
+Cool.regClass,
+Cool.regExps,
+Cool.removeClass,
+Cool.replaceClass,
+Cool.swapClass,
+Cool.toggleClass
 
 
 ## 组件构建
