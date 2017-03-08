@@ -1,6 +1,6 @@
 {
   "name": "z-cool",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "javascript DOM Object handle",
   "main": "jquery-plugins.js",
   "scripts": {
@@ -41,6 +41,6 @@
     "uglify-js": "^2.7.5"
   },
   "dependencies": {
-    "z-utils": "^1.2.0"
+    "z-utils": "^1.2.1"
   }
 }

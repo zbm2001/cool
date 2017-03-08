@@ -66,35 +66,66 @@ function addClass(elem, newClass) {
   return false;
 }
 
+var root = zUtils.global.document && zUtils.global.document.documentElement;
 /**
  * 检测元素是否匹配指定的选择器
- * 
+ *
  * @param  {HTMLElement} elem 指定的元素
  * @param  {String} selector 匹配的选择器
  * @return {Boolean}
  */
-function matches(elem, selector) {
-  return elem.matches ? elem.matches(selector) :
-    elem.matchesSelector ? elem.matchesSelector(selector) :
-    elem.webkitMatchesSelector ? elem.webkitMatchesSelector(selector) :
-    elem.mozMatchesSelector ? elem.mozMatchesSelector(selector) :
-    elem.msMatchesSelector ? elem.msMatchesSelector(selector) :
-    function(elem, selector) {
-      var parentNode = elem.parentNode,
-        elems, i = -1;
-      if (parentNode) {
-        elems = parentNode.querySelectorAll(selector);
-        while (elems[++i]) {
-          if (elems[i] === elem) { return true; }
-        }
-        return false;
-      } else {
-        parentNode = elem.ownerDocument.createElement('div');
-        parentNode.appendChild(elem);
-        return parentNode.querySelector(selector) === parentNode.removeChild(elem);
-      }
-    }(elem, selector);
-}
+var matches = root ? root.matches ? function matches (elem, selector) {
+      return elem.matches(selector)
+    } :
+    root.matchesSelector ? function matches (elem, selector) {
+        return elem.matchesSelector(selector)
+      } :
+      root.webkitMatchesSelector ? function matches (elem, selector) {
+          return elem.webkitMatchesSelector(selector)
+        } :
+        root.mozMatchesSelector ? function matches (elem, selector) {
+            return elem.mozMatchesSelector(selector)
+          } :
+          root.msMatchesSelector ? function matches (elem, selector) {
+              return elem.msMatchesSelector(selector)
+            } :
+            function matches (elem, selector) {
+              var parentNode = elem.parentNode,
+                elems, i = -1;
+              if (parentNode) {
+                elems = parentNode.querySelectorAll(selector);
+                while (elems[++i]) {
+                  if (elems[i] === elem) { return true; }
+                }
+                return false;
+              } else {
+                parentNode = elem.ownerDocument.createElement('div');
+                parentNode.appendChild(elem);
+                return parentNode.querySelector(selector) === parentNode.removeChild(elem);
+              }
+            } :
+  function matches (elem, selector) {
+    return elem.matches ? elem.matches(selector) :
+      elem.matchesSelector ? elem.matchesSelector(selector) :
+        elem.webkitMatchesSelector ? elem.webkitMatchesSelector(selector) :
+          elem.mozMatchesSelector ? elem.mozMatchesSelector(selector) :
+            elem.msMatchesSelector ? elem.msMatchesSelector(selector) :
+              function (elem, selector) {
+                var parentNode = elem.parentNode,
+                  elems, i = -1;
+                if (parentNode) {
+                  elems = parentNode.querySelectorAll(selector);
+                  while (elems[++i]) {
+                    if (elems[i] === elem) { return true; }
+                  }
+                  return false;
+                } else {
+                  parentNode = elem.ownerDocument.createElement('div');
+                  parentNode.appendChild(elem);
+                  return parentNode.querySelector(selector) === parentNode.removeChild(elem);
+                }
+              }(elem, selector);
+  };
 
 /**
  * 从一个元素向上检索一个匹配的祖先元素
@@ -142,8 +173,8 @@ function ancestorAll(elem, selector, root, includeItself) {
 /**
  * 通过定义的样式类创建一个匹配的正则
  * 
- * @param  {string} cssClass 单个或多个样式类
- * @return {object.RegExp} 返回匹配的正则对象
+ * @param  {String} cssClass 单个或多个样式类
+ * @return {RegExp} 返回匹配的正则对象
  */
 function regClass(cssClass) {
 	return new RegExp('(?:^|\\s)(?:' + cssClass.trim().replace(rSpaces_g, '|') + ')(?!\\S)', 'g');
@@ -258,7 +289,7 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
     }, function(name, preHandleEvent, handleEvent) {
       return function() {
         if (preHandleEvent) {
-          results[name] = preHandleEvent.apply(this, arguments);
+          results[name] = preHandleEvent.apply(this, Array.prototype.slice.call(arguments).concat(options));
         }
         if (handleEvent && results[name] !== false) {
           return handleEvent.apply(this, arguments);
@@ -275,7 +306,9 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
 
     // 异步请求
     // 这里是为解决某些虽然请求success，但可能业务失败的预处理场景
-    $ajaxThen = $ajax.then(function(res) { //console.log(res);console.log($ajaxThen)
+    $ajaxThen = $ajax.then(function(res) {
+      //console.log(res);
+      // console.log($ajaxThen)
       // 后只覆盖属性（此时$ajax属性已变更）
       extendBind($ajaxThen, $ajax, true);
       // jquery对原生Promise返回对象不可直接使用
