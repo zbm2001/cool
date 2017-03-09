@@ -288,10 +288,11 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
       newOptions[name] = this(name, preHandleEvents[name], options[name]);
     }, function(name, preHandleEvent, handleEvent) {
       return function() {
+        var result;
         if (preHandleEvent) {
-          results[name] = preHandleEvent.apply(this, Array.prototype.slice.call(arguments).concat(options));
+          result = results[name] = preHandleEvent.apply(this, Array.prototype.slice.call(arguments).concat(options));
         }
-        if (handleEvent && results[name] !== false) {
+        if (handleEvent && result !== false && !(result && typeof result.then === 'function')) {
           return handleEvent.apply(this, arguments);
         }
       }
@@ -316,7 +317,7 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
       // return result !== false ? res : Promise.reject(res);
       // return result !== false ? res : $.Deferred().reject(res);
       // 若 success 执行结果为类 Promise 对象，优先返回
-      return result !== false ? result && result.then ? result : res : $.Deferred().reject(res);
+      return result !== false ? result && typeof result.then === 'function' ? result : res : $.Deferred().reject(res);
     });
 
     // 先只覆盖方法（绑定scope为$ajax）
