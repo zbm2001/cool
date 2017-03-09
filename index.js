@@ -278,9 +278,9 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
   return function ajax(options) {
 
     var newOptions = $.extend({}, preOptions, options),
-      $ajax,
-      $ajaxThen,
-      results = {};
+        $ajax,
+        $ajaxThen,
+        results = {};
 
     presetOptions && presetOptions(newOptions);
 
@@ -307,13 +307,16 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
     // 异步请求
     // 这里是为解决某些虽然请求success，但可能业务失败的预处理场景
     $ajaxThen = $ajax.then(function(res) {
-      //console.log(res);
+      var result = results.success;
+      // console.log(res);
       // console.log($ajaxThen)
       // 后只覆盖属性（此时$ajax属性已变更）
       extendBind($ajaxThen, $ajax, true);
-      // jquery对原生Promise返回对象不可直接使用
-      //return results.success !== false ? res : Promise.reject(res);
-      return results.success !== false ? res : $.Deferred().reject(res);
+      // jquery2对原生Promise返回对象不可直接使用
+      // return result !== false ? res : Promise.reject(res);
+      // return result !== false ? res : $.Deferred().reject(res);
+      // 若 success 执行结果为类 Promise 对象，优先返回
+      return result !== false ? result && result.then ? result : res : $.Deferred().reject(res);
     });
 
     // 先只覆盖方法（绑定scope为$ajax）
