@@ -1,4 +1,4 @@
-import {rSpaces_g} from './regExps';
+import {rSpaces_g} from './regExps'
 
 /**
  * 通过定义的样式类创建一个匹配的正则
@@ -7,5 +7,5 @@ import {rSpaces_g} from './regExps';
  * @return {RegExp} 返回匹配的正则对象
  */
 export default function regClass(cssClass) {
-	return new RegExp('(?:^|\\s)(?:' + cssClass.trim().replace(rSpaces_g, '|') + ')(?!\\S)', 'g');
+	return new RegExp('(?:^|\\s)(?:' + cssClass.trim().replace(rSpaces_g, '|') + ')(?!\\S)', 'g')
 }

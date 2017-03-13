@@ -1,5 +1,5 @@
-import regClass from './regClass';
-import {typeOf} from 'z-utils';
+import regClass from './regClass'
+import {typeOf} from 'z-utils'
 
 /**
  * 为元素替换指定的样式类
@@ -11,38 +11,38 @@ import {typeOf} from 'z-utils';
  * @return {Boolean} 返回结果表明是否实际替换了样式类
  */
 export default function replaceClass(elem, beReplacedClass, replacedClass, whether) {
-  var cssClass, newClass, isString;
+  var cssClass, newClass, isString
   // 若没有指定样式类
   if(!replacedClass || typeof replacedClass !== 'string'){
-    return false;
+    return false
   }
   if (!beReplacedClass || ((isString = typeof beReplacedClass === 'string') ? !(beReplacedClass = beReplacedClass.trim()) : typeOf(beReplacedClass) !== 'RegExp')) {
-    return false;
+    return false
   }
 
   if ((cssClass = elem.className) && (cssClass = cssClass.trim())) {
     if (isString) {
       if (cssClass === beReplacedClass) {
-        elem.className = replacedClass;
-        return true;
+        elem.className = replacedClass
+        return true
       }
-      beReplacedClass = regClass(beReplacedClass);
+      beReplacedClass = regClass(beReplacedClass)
     }
 
-    newClass = cssClass.replace(beReplacedClass, '');
+    newClass = cssClass.replace(beReplacedClass, '')
     if (newClass === cssClass) {
       if (whether) {
-        elem.className = cssClass + ' ' + replacedClass;
-        return true;
+        elem.className = cssClass + ' ' + replacedClass
+        return true
       }
-      return false;
+      return false
     }
-    elem.className = newClass + ' ' + replacedClass;
-    return true;
+    elem.className = newClass + ' ' + replacedClass
+    return true
   }
   if (whether) {
-    elem.className = replacedClass;
-    return true;
+    elem.className = replacedClass
+    return true
   }
-  return false;
+  return false
 }

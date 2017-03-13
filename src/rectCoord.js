@@ -11,7 +11,7 @@ export default function rectCoord(elem) {
     win = doc.defaultView,
     offsetTop = win.pageYOffset + docRoot.clientTop,
     offsetLeft = win.pageXOffset + docRoot.clientLeft,
-    rectCoord = elem.getBoundingClientRect();
+    rectCoord = elem.getBoundingClientRect()
 
   return {
     top: rectCoord.top + offsetTop,

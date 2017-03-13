@@ -1,4 +1,4 @@
-import matches from './matches';
+import matches from './matches'
 
 /**
  * 从一个元素向上检索所有匹配的祖先元素
@@ -11,11 +11,11 @@ import matches from './matches';
  */
 export default function ancestorAll(elem, selector, root, includeItself) {
   var arr = [],
-    parentNode = elem;
-  includeItself && matches(elem, selector) && arr.push(elem);
-  root || (root = elem.ownerDocument);
+    parentNode = elem
+  includeItself && matches(elem, selector) && arr.push(elem)
+  root || (root = elem.ownerDocument)
   while ((parentNode = parentNode.parentNode) && parentNode !== root) {
-    matches(parentNode, selector) && arr.push(elem);
+    matches(parentNode, selector) && arr.push(elem)
   }
-  return arr;
+  return arr
 }

@@ -1,6 +1,6 @@
-import {rSpace} from './regExps';
-import regClass from './regClass';
-import {typeOf} from 'z-utils';
+import {rSpace} from './regExps'
+import regClass from './regClass'
+import {typeOf} from 'z-utils'
 
 
 /**
@@ -11,11 +11,11 @@ import {typeOf} from 'z-utils';
  * @return {Boolean} 返回结果表明是否实际删除了样式类
  */
 export default function removeClass(elem, removedClass) {
-  var cssClass, newClass, isRegExp;
+  var cssClass, newClass, isRegExp
   // 若没有指定样式类
   if (!removedClass || (typeof removedClass === 'string' ? !(removedClass = removedClass.trim()) : !(isRegExp = typeOf(beReplacedClass) === 'RegExp'))) {
-    elem.className = '';
-    return true;
+    elem.className = ''
+    return true
   }
 
   // 已有样式类
@@ -23,33 +23,33 @@ export default function removeClass(elem, removedClass) {
 
     // 若测试一个正则表达式
     if (isRegExp) {
-      newClass = cssClass.replace(removedClass, '');
+      newClass = cssClass.replace(removedClass, '')
       if (newClass !== cssClass) {
-        elem.className = newClass;
-        return true;
+        elem.className = newClass
+        return true
       }
-      return false;
+      return false
     }
     if (cssClass === removedClass) {
-      elem.className = '';
-      return true;
+      elem.className = ''
+      return true
     }
     // 若元素为多样式类
     if (rSpace.test(cssClass)) {
-      newClass = cssClass.replace(regClass(removedClass), '');
+      newClass = cssClass.replace(regClass(removedClass), '')
       if (newClass === cssClass) {
-        return false;
+        return false
       }
-      elem.className = newClass;
-      return true;
+      elem.className = newClass
+      return true
     }
     // 若元素为单样式类
     if (removedClass.indexOf(' ') < 0 || (' ' + removedClass + ' ').indexOf(' ' + cssClass + ' ') < 0) {
-      return false;
+      return false
     }
-    elem.className = removedClass;
-    return true;
+    elem.className = removedClass
+    return true
   }
   // 无样式类
-  return false;
+  return false
 }

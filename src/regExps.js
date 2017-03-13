@@ -1,7 +1,7 @@
-const rSpace = /\s/;
-const rSpaces = /\s+/;
-const rSpaces_g = /\s+/g;
-const rRNTFs_g = /[\r\n\t\f]+/g;
+const rSpace = /\s/
+const rSpaces = /\s+/
+const rSpaces_g = /\s+/g
+const rRNTFs_g = /[\r\n\t\f]+/g
 
 export {
   rSpace,

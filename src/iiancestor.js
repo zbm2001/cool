@@ -1,4 +1,4 @@
-import ancestor from './ancestor';
+import ancestor from './ancestor'
 
 /**
  * 从一个元素自身算起，向上检索一个匹配的祖先元素
@@ -10,5 +10,5 @@ import ancestor from './ancestor';
  * @return {HTMLElement|null} 返回匹配元素或null
  */
 export default function iiancestor(elem, selector, root) {
-  return ancestor(elem, selector, root, true);
+  return ancestor(elem, selector, root, true)
 }

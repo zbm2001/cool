@@ -1,4 +1,4 @@
-import ancestorAll from './ancestorAll';
+import ancestorAll from './ancestorAll'
 /**
  * 从一个元素自身算起，向上检索所有匹配的祖先元素
  *     include itself ancestor all
@@ -9,5 +9,5 @@ import ancestorAll from './ancestorAll';
  * @return {HTMLElement|null} 返回匹配元素或null
  */
 export default function iiancestorAll(elem, selector, root) {
-  return ancestorAll(elem, selector, root, true);
+  return ancestorAll(elem, selector, root, true)
 }

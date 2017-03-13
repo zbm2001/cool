@@ -1,4 +1,4 @@
-import matches from './matches';
+import matches from './matches'
 
 /**
  * 从一个元素向上检索一个匹配的祖先元素
@@ -10,15 +10,15 @@ import matches from './matches';
  * @return {HTMLElement|null} 返回匹配元素或null
  */
 export default function ancestor(elem, selector, root, includeItself) {
-  var parentNode = elem;
+  var parentNode = elem
   if (includeItself && matches(elem, selector)) {
-    return elem;
+    return elem
   }
-  root || (root = elem.ownerDocument);
+  root || (root = elem.ownerDocument)
   while ((parentNode = parentNode.parentNode) && parentNode !== root) {
     if (matches(parentNode, selector)) {
-      return parentNode;
+      return parentNode
     }
   }
-  return null;
+  return null
 }

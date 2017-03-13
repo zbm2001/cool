@@ -1,4 +1,4 @@
-import regClass from './regClass';
+import regClass from './regClass'
 
 /**
  * 为元素开关指定的样式类
@@ -14,27 +14,27 @@ import regClass from './regClass';
 export default function toggleClass(elem, toggledClass, matchAll) {
 
   if (!(toggledClass && (toggledClass = toggledClass.trim()))) {
-    return 0;
+    return 0
   }
   var cssClass = elem.className,
-    newClass;
+    newClass
 
   if (cssClass && (cssClass = cssClass.trim())) {
     if (cssClass === toggledClass) {
-      elem.className = '';
-      return -1;
+      elem.className = ''
+      return -1
     }
-    newClass = cssClass.replace(regClass(toggledClass), '');
+    newClass = cssClass.replace(regClass(toggledClass), '')
     if (newClass === cssClass) {
-      elem.className = cssClass + ' ' + toggledClass;
-      return 1;
+      elem.className = cssClass + ' ' + toggledClass
+      return 1
     }
     if (toggledClass.indexOf(' ') < 0 || !matchAll) {
-      elem.className = newClass;
-      return -1;
+      elem.className = newClass
+      return -1
     }
     
   }
-  elem.className = toggledClass;
-  return 1;
+  elem.className = toggledClass
+  return 1
 }

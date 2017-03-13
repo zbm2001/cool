@@ -25,17 +25,17 @@ export default root ? root.matches ? function matches (elem, selector) {
             } :
             function matches (elem, selector) {
               var parentNode = elem.parentNode,
-                elems, i = -1;
+                elems, i = -1
               if (parentNode) {
-                elems = parentNode.querySelectorAll(selector);
+                elems = parentNode.querySelectorAll(selector)
                 while (elems[++i]) {
-                  if (elems[i] === elem) return true;
+                  if (elems[i] === elem) return true
                 }
-                return false;
+                return false
               } else {
-                parentNode = elem.ownerDocument.createElement('div');
-                parentNode.appendChild(elem);
-                return parentNode.querySelector(selector) === parentNode.removeChild(elem);
+                parentNode = elem.ownerDocument.createElement('div')
+                parentNode.appendChild(elem)
+                return parentNode.querySelector(selector) === parentNode.removeChild(elem)
               }
             } :
   function matches (elem, selector) {
@@ -46,17 +46,17 @@ export default root ? root.matches ? function matches (elem, selector) {
             elem.msMatchesSelector ? elem.msMatchesSelector(selector) :
               function (elem, selector) {
                 var parentNode = elem.parentNode,
-                  elems, i = -1;
+                  elems, i = -1
                 if (parentNode) {
-                  elems = parentNode.querySelectorAll(selector);
+                  elems = parentNode.querySelectorAll(selector)
                   while (elems[++i]) {
-                    if (elems[i] === elem) return true;
+                    if (elems[i] === elem) return true
                   }
-                  return false;
+                  return false
                 } else {
-                  parentNode = elem.ownerDocument.createElement('div');
-                  parentNode.appendChild(elem);
-                  return parentNode.querySelector(selector) === parentNode.removeChild(elem);
+                  parentNode = elem.ownerDocument.createElement('div')
+                  parentNode.appendChild(elem)
+                  return parentNode.querySelector(selector) === parentNode.removeChild(elem)
                 }
-              }(elem, selector);
+              }(elem, selector)
   }
