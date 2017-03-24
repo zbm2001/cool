@@ -1,4 +1,5 @@
 import {assign} from 'z-utils'
+import $ from './$'
 
 var AP = Array.prototype,
   slice = AP.slice,
@@ -9,14 +10,20 @@ var AP = Array.prototype,
   reverse = AP.reverse,
   splice = AP.splice,
   indexOf = AP.indexOf,
-  findIndex = AP.findIndex,
   forEach = AP.forEach,
   reduce = AP.reduce,
   reduceRight = AP.reduceRight,
-  includes = AP.includes
+  includes = AP.includes,
+  find = AP.find,
+  findIndex = AP.findIndex,
+  copyWithin = AP.copyWithin,
+  fill = AP.fill,
+  entries = AP.entries,
+  keys = AP.keys,
+  values = AP.values
 
 function $$ (selector, context) {
-  var $$1 = create($$.fn)
+  var $2 = create($$.prototype)
   if (selector) {
     switch (typeof selector) {
       case 'string':
@@ -25,27 +32,28 @@ function $$ (selector, context) {
       case 'object':
         if(selector.cool) return selector
         if (selector === window || selector.nodeType) {
-          this[0] = selector
-          this.length = 1
-          return this
+          $2[0] = selector
+          $2.length = 1
+          return $2
         }
         break
     }
-    push.apply(this, selector)
+    push.apply($2, selector)
   }
-  return this
+  return $2
 }
 
-assign($$, {
-  fn: $$.prototype,
-  from(arr){
-
+export default assign($$, {
+  from(arrLike, fn){
+    return slice.call(arrLike).forEach(fn)
   },
   of(){
+    return slice.call(arguments)
   }
 })
 
-assign($$.fn, {
+assign($$.prototype, {
+  $,
   length: 0,
   pop,
   push,
@@ -54,8 +62,11 @@ assign($$.fn, {
   reverse,
   splice,
   indexOf,
-  findIndex,
   forEach,
+  reduce,
+  reduceRight,
+  find,
+  findIndex,
   includes,
   toArray(){
     return slice.call(this)

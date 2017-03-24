@@ -4,6 +4,89 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var zUtils = require('z-utils');
 
+function $ (selector, context) {
+  return typeof selector !== 'string' ? selector : (context || document).queryselector(selector)
+}
+
+var AP = Array.prototype;
+var slice = AP.slice;
+var pop = AP.pop;
+var push = AP.push;
+var shift = AP.shift;
+var unshift = AP.unshift;
+var reverse = AP.reverse;
+var splice = AP.splice;
+var indexOf = AP.indexOf;
+var forEach = AP.forEach;
+var reduce = AP.reduce;
+var reduceRight = AP.reduceRight;
+var includes = AP.includes;
+var find = AP.find;
+var findIndex = AP.findIndex;
+
+function $$$1 (selector, context) {
+  var $2 = create($$$1.prototype);
+  if (selector) {
+    switch (typeof selector) {
+      case 'string':
+        selector = (context || document).queryselectorAll(selector);
+        break
+      case 'object':
+        if(selector.cool) { return selector }
+        if (selector === window || selector.nodeType) {
+          $2[0] = selector;
+          $2.length = 1;
+          return $2
+        }
+        break
+    }
+    push.apply($2, selector);
+  }
+  return $2
+}
+
+var $$$2 = zUtils.assign($$$1, {
+  from: function from(arrLike, fn){
+    return slice.call(arrLike).forEach(fn)
+  },
+  of: function of(){
+    return slice.call(arguments)
+  }
+});
+
+zUtils.assign($$$1.prototype, {
+  $: $,
+  length: 0,
+  pop: pop,
+  push: push,
+  shift: shift,
+  unshift: unshift,
+  reverse: reverse,
+  splice: splice,
+  indexOf: indexOf,
+  forEach: forEach,
+  reduce: reduce,
+  reduceRight: reduceRight,
+  find: find,
+  findIndex: findIndex,
+  includes: includes,
+  toArray: function toArray(){
+    return slice.call(this)
+  },
+  add: function add(){
+    push.apply(this, arguments);
+    return this
+  },
+  concat: function concat(){
+    var this$1 = this;
+
+    forEach.call(arguments, function (arr) {
+      push.apply(this$1, arr);
+    });
+    return this
+  }
+});
+
 var rSpace = /\s/;
 var rSpaces = /\s+/;
 var rSpaces_g = /\s+/g;
@@ -27,12 +110,12 @@ function addClass(elem, newClass) {
   var cssClass, wrapCssClass, testCssClass, newClasses, i = -1;
   // 若没有指定样式类
   if (!newClass || typeof newClass !== 'string' && !(newClass = newClass.trim())) {
-    return false;
+    return false
   }
 
   if ((cssClass = elem.className) && (cssClass = cssClass.trim())) {
     if (cssClass === newClass) {
-      return false;
+      return false
     }
 
     // 清理非空格的空白字符
@@ -45,9 +128,9 @@ function addClass(elem, newClass) {
       newClass = ' ' + newClass;
       if (testCssClass.indexOf(newClass + ' ') < 0) {
         elem.className = cssClass + newClass;
-        return true;
+        return true
       }
-      return false;
+      return false
     }
 
     // 添加多样式类
@@ -60,10 +143,10 @@ function addClass(elem, newClass) {
     // 若已做了新增操作
     if (testCssClass !== wrapCssClass) {
       elem.className = testCssClass.slice(1, -1);
-      return true;
+      return true
     }
   }
-  return false;
+  return false
 }
 
 var root = zUtils.global.document && zUtils.global.document.documentElement;
@@ -95,13 +178,13 @@ var matches = root ? root.matches ? function matches (elem, selector) {
               if (parentNode) {
                 elems = parentNode.querySelectorAll(selector);
                 while (elems[++i]) {
-                  if (elems[i] === elem) { return true; }
+                  if (elems[i] === elem) { return true }
                 }
-                return false;
+                return false
               } else {
                 parentNode = elem.ownerDocument.createElement('div');
                 parentNode.appendChild(elem);
-                return parentNode.querySelector(selector) === parentNode.removeChild(elem);
+                return parentNode.querySelector(selector) === parentNode.removeChild(elem)
               }
             } :
   function matches (elem, selector) {
@@ -116,15 +199,15 @@ var matches = root ? root.matches ? function matches (elem, selector) {
                 if (parentNode) {
                   elems = parentNode.querySelectorAll(selector);
                   while (elems[++i]) {
-                    if (elems[i] === elem) { return true; }
+                    if (elems[i] === elem) { return true }
                   }
-                  return false;
+                  return false
                 } else {
                   parentNode = elem.ownerDocument.createElement('div');
                   parentNode.appendChild(elem);
-                  return parentNode.querySelector(selector) === parentNode.removeChild(elem);
+                  return parentNode.querySelector(selector) === parentNode.removeChild(elem)
                 }
-              }(elem, selector);
+              }(elem, selector)
   };
 
 /**
@@ -139,15 +222,15 @@ var matches = root ? root.matches ? function matches (elem, selector) {
 function ancestor(elem, selector, root, includeItself) {
   var parentNode = elem;
   if (includeItself && matches(elem, selector)) {
-    return elem;
+    return elem
   }
   root || (root = elem.ownerDocument);
   while ((parentNode = parentNode.parentNode) && parentNode !== root) {
     if (matches(parentNode, selector)) {
-      return parentNode;
+      return parentNode
     }
   }
-  return null;
+  return null
 }
 
 /**
@@ -167,7 +250,7 @@ function ancestorAll(elem, selector, root, includeItself) {
   while ((parentNode = parentNode.parentNode) && parentNode !== root) {
     matches(parentNode, selector) && arr.push(elem);
   }
-  return arr;
+  return arr
 }
 
 /**
@@ -177,7 +260,7 @@ function ancestorAll(elem, selector, root, includeItself) {
  * @return {RegExp} 返回匹配的正则对象
  */
 function regClass(cssClass) {
-	return new RegExp('(?:^|\\s)(?:' + cssClass.trim().replace(rSpaces_g, '|') + ')(?!\\S)', 'g');
+	return new RegExp('(?:^|\\s)(?:' + cssClass.trim().replace(rSpaces_g, '|') + ')(?!\\S)', 'g')
 }
 
 /**
@@ -191,7 +274,7 @@ function regClass(cssClass) {
 function hasClass(elem, testClass, matchAll) {
   // 若没有指定样式类
   if(!testClass || (typeof testClass === 'string' ? !(testClass = testClass.trim()) : !testClass.test)){
-    return false;
+    return false
   }
   var cssClass = elem.className,
     newClass, l;
@@ -201,21 +284,21 @@ function hasClass(elem, testClass, matchAll) {
 
     // 若测试一个正则表达式
     if (testClass.test) {
-      return testClass.test(cssClass);
+      return testClass.test(cssClass)
     }
     if (cssClass === testClass) {
-      return true;
+      return true
     }
 
     cssClass = cssClass.replace(rRNTFs_g, ' ');
 
     // 若元素为单样式类
     if (cssClass.indexOf(' ') < 0) {
-      return !matchAll && testClass.indexOf(' ') > -1 && (' ' + testClass + ' ').indexOf(' ' + cssClass + ' ') > -1;
+      return !matchAll && testClass.indexOf(' ') > -1 && (' ' + testClass + ' ').indexOf(' ' + cssClass + ' ') > -1
     }
     // 若检测单样式类
     if (testClass.indexOf(' ') < 0) {
-      return (' ' + cssClass + ' ').indexOf(' ' + testClass + ' ') > -1;
+      return (' ' + cssClass + ' ').indexOf(' ' + testClass + ' ') > -1
     }
     // 若检测多样式类
     if (matchAll) {
@@ -224,15 +307,15 @@ function hasClass(elem, testClass, matchAll) {
       l = testClass.length;
       while (--l) {
         if (newClass.indexOf(testClass[l]) < 0) {
-          return false;
+          return false
         }
       }
-      return true;
+      return true
     }
 
-    return regClass(testClass).test(cssClass);
+    return regClass(testClass).test(cssClass)
   }
-  return false;
+  return false
 }
 
 /**
@@ -245,7 +328,7 @@ function hasClass(elem, testClass, matchAll) {
  * @return {HTMLElement|null} 返回匹配元素或null
  */
 function iiancestor(elem, selector, root) {
-  return ancestor(elem, selector, root, true);
+  return ancestor(elem, selector, root, true)
 }
 
 /**
@@ -258,7 +341,7 @@ function iiancestor(elem, selector, root) {
  * @return {HTMLElement|null} 返回匹配元素或null
  */
 function iiancestorAll(elem, selector, root) {
-  return ancestorAll(elem, selector, root, true);
+  return ancestorAll(elem, selector, root, true)
 }
 
 /**
@@ -282,7 +365,7 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
         $ajaxThen,
         results = {};
 
-    presetOptions && presetOptions(newOptions);
+    presetOptions && presetOptions(newOptions)
 
     ['success', 'beforeSend', 'error', 'complete'].forEach(function(name) {
       newOptions[name] = this(name, preHandleEvents[name], options[name]);
@@ -293,7 +376,7 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
           result = results[name] = preHandleEvent.apply(this, Array.prototype.slice.call(arguments).concat(options));
         }
         if (handleEvent && result !== false && !(result && typeof result.then === 'function')) {
-          return handleEvent.apply(this, arguments);
+          return handleEvent.apply(this, arguments)
         }
       }
     });
@@ -302,26 +385,24 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
 
     // 同步请求直接返回原jquery ajax对象
     if ('async' in newOptions && !newOptions.async) {
-      return $ajax;
+      return $ajax
     }
 
     // 异步请求
     // 这里是为解决某些虽然请求success，但可能业务失败的预处理场景
     $ajaxThen = $ajax.then(function(res) {
       var result = results.success;
-      // console.log(res);
-      // console.log($ajaxThen)
       // 后只覆盖属性（此时$ajax属性已变更）
       extendBind($ajaxThen, $ajax, true);
-      // jquery2对原生Promise返回对象不可直接使用
-      // return result !== false ? res : Promise.reject(res);
-      // return result !== false ? res : $.Deferred().reject(res);
+      // jquery2 对原生 Promise 返回对象不可直接使用
+      // return result !== false ? res : Promise.reject(res)
+      // return result !== false ? res : $.Deferred().reject(res)
       // 若 success 执行结果为类 Promise 对象，优先返回
-      return result !== false ? result && typeof result.then === 'function' ? result : res : $.Deferred().reject(res);
+      return result === false ? $.Deferred().reject(res) : result && typeof result.then === 'function' ? result : res
     });
 
     // 先只覆盖方法（绑定scope为$ajax）
-    return extendBind($ajaxThen, $ajax, false);
+    return extendBind($ajaxThen, $ajax, false)
 
     // 让return出的对象保持某些原方法可用（如：abort）
     // 将原 jQuery ajax 对象的绑定方法和属性，附加到then出的目标对象上
@@ -340,7 +421,7 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
           }
         }
       });
-      return target;
+      return target
     }
   }
 }
@@ -383,7 +464,7 @@ function removeClass(elem, removedClass) {
   // 若没有指定样式类
   if (!removedClass || (typeof removedClass === 'string' ? !(removedClass = removedClass.trim()) : !(isRegExp = zUtils.typeOf(beReplacedClass) === 'RegExp'))) {
     elem.className = '';
-    return true;
+    return true
   }
 
   // 已有样式类
@@ -394,32 +475,32 @@ function removeClass(elem, removedClass) {
       newClass = cssClass.replace(removedClass, '');
       if (newClass !== cssClass) {
         elem.className = newClass;
-        return true;
+        return true
       }
-      return false;
+      return false
     }
     if (cssClass === removedClass) {
       elem.className = '';
-      return true;
+      return true
     }
     // 若元素为多样式类
     if (rSpace.test(cssClass)) {
       newClass = cssClass.replace(regClass(removedClass), '');
       if (newClass === cssClass) {
-        return false;
+        return false
       }
       elem.className = newClass;
-      return true;
+      return true
     }
     // 若元素为单样式类
     if (removedClass.indexOf(' ') < 0 || (' ' + removedClass + ' ').indexOf(' ' + cssClass + ' ') < 0) {
-      return false;
+      return false
     }
     elem.className = removedClass;
-    return true;
+    return true
   }
   // 无样式类
-  return false;
+  return false
 }
 
 /**
@@ -435,17 +516,17 @@ function replaceClass(elem, beReplacedClass, replacedClass, whether) {
   var cssClass, newClass, isString;
   // 若没有指定样式类
   if(!replacedClass || typeof replacedClass !== 'string'){
-    return false;
+    return false
   }
   if (!beReplacedClass || ((isString = typeof beReplacedClass === 'string') ? !(beReplacedClass = beReplacedClass.trim()) : zUtils.typeOf(beReplacedClass) !== 'RegExp')) {
-    return false;
+    return false
   }
 
   if ((cssClass = elem.className) && (cssClass = cssClass.trim())) {
     if (isString) {
       if (cssClass === beReplacedClass) {
         elem.className = replacedClass;
-        return true;
+        return true
       }
       beReplacedClass = regClass(beReplacedClass);
     }
@@ -454,18 +535,18 @@ function replaceClass(elem, beReplacedClass, replacedClass, whether) {
     if (newClass === cssClass) {
       if (whether) {
         elem.className = cssClass + ' ' + replacedClass;
-        return true;
+        return true
       }
-      return false;
+      return false
     }
     elem.className = newClass + ' ' + replacedClass;
-    return true;
+    return true
   }
   if (whether) {
     elem.className = replacedClass;
-    return true;
+    return true
   }
-  return false;
+  return false
 }
 
 /**
@@ -483,35 +564,35 @@ function swapClass(elem, cssClass1, cssClass2) {
   var cssClass, newClass;
   // 若没有指定样式类
   if (!cssClass1 || typeof cssClass1 !== 'string' || !(cssClass1 = cssClass1.trim())) {
-    return 0;
+    return 0
   }
   if (!cssClass2 || typeof cssClass2 !== 'string' || !(cssClass2 = cssClass2.trim())) {
-    return 0;
+    return 0
   }
 
   if ((cssClass = elem.className) && (cssClass = cssClass.trim())) {
     if (cssClass === cssClass1) {
       elem.className = cssClass2;
-      return 1;
+      return 1
     }
     if (cssClass === cssClass2) {
       elem.className = cssClass1;
-      return -1;
+      return -1
     }
 
     newClass = cssClass.replace(regClass(cssClass1), '');
     if (newClass !== cssClass) {
       elem.className = newClass + ' ' + cssClass2;
-      return 1;
+      return 1
     }
 
     newClass = cssClass.replace(regClass(cssClass2), '');
     if (newClass !== cssClass) {
       elem.className = newClass + ' ' + cssClass1;
-      return -1;
+      return -1
     }
   }
-  return 0;
+  return 0
 }
 
 /**
@@ -528,7 +609,7 @@ function swapClass(elem, cssClass1, cssClass2) {
 function toggleClass(elem, toggledClass, matchAll) {
 
   if (!(toggledClass && (toggledClass = toggledClass.trim()))) {
-    return 0;
+    return 0
   }
   var cssClass = elem.className,
     newClass;
@@ -536,25 +617,25 @@ function toggleClass(elem, toggledClass, matchAll) {
   if (cssClass && (cssClass = cssClass.trim())) {
     if (cssClass === toggledClass) {
       elem.className = '';
-      return -1;
+      return -1
     }
     newClass = cssClass.replace(regClass(toggledClass), '');
     if (newClass === cssClass) {
       elem.className = cssClass + ' ' + toggledClass;
-      return 1;
+      return 1
     }
     if (toggledClass.indexOf(' ') < 0 || !matchAll) {
       elem.className = newClass;
-      return -1;
+      return -1
     }
     
   }
   elem.className = toggledClass;
-  return 1;
+  return 1
 }
 
-var core = {
-
+zUtils.assign($, {
+  $$: $$$2,
   addClass: addClass,
   ancestor: ancestor,
   ancestorAll: ancestorAll,
@@ -570,10 +651,11 @@ var core = {
   replaceClass: replaceClass,
   swapClass: swapClass,
   toggleClass: toggleClass
+});
 
-};
-
-exports['default'] = core;
+exports['default'] = $$$2;
+exports.$ = $;
+exports.$$ = $$$2;
 exports.addClass = addClass;
 exports.ancestor = ancestor;
 exports.ancestorAll = ancestorAll;

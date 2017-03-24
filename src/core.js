@@ -1,3 +1,6 @@
+import {assign} from 'z-utils'
+import $ from './$'
+import $$ from './$$'
 import addClass from './addClass'
 import ancestor from './ancestor'
 import ancestorAll from './ancestorAll'
@@ -15,7 +18,8 @@ import swapClass from './swapClass'
 import toggleClass from './toggleClass'
 
 export {
-
+  $,
+  $$,
   addClass,
   ancestor,
   ancestorAll,
@@ -31,11 +35,10 @@ export {
   replaceClass,
   swapClass,
   toggleClass
-
 }
 
-export default {
-
+assign($, {
+  $$,
   addClass,
   ancestor,
   ancestorAll,
@@ -51,5 +54,6 @@ export default {
   replaceClass,
   swapClass,
   toggleClass
+})
 
-}
+export default $$
