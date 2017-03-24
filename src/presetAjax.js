@@ -19,7 +19,7 @@ export default function presetAjax($, preOptions, preHandleEvents, presetOptions
         $ajaxThen,
         results = {}
 
-    presetOptions && presetOptions(newOptions)
+    presetOptions && presetOptions(newOptions);
 
     ['success', 'beforeSend', 'error', 'complete'].forEach(function(name) {
       newOptions[name] = this(name, preHandleEvents[name], options[name])
