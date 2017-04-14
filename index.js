@@ -363,7 +363,7 @@ function presetAjax ($, preOptions, preHandleEvents, presetOptions) {
     var newOptions = $.extend({}, preOptions, options),
         $ajax,
         $ajaxThen,
-        results = {};
+        results = {},
         cloneOptions = $.extend(true, {}, options);
 
     presetOptions && presetOptions(newOptions);

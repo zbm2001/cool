@@ -17,7 +17,7 @@ export default function presetAjax ($, preOptions, preHandleEvents, presetOption
     var newOptions = $.extend({}, preOptions, options),
         $ajax,
         $ajaxThen,
-        results = {}
+        results = {},
         cloneOptions = $.extend(true, {}, options)
 
     presetOptions && presetOptions(newOptions);
