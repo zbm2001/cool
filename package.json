@@ -1,6 +1,6 @@
 {
   "name": "z-cool",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "javascript DOM Object handle",
   "main": "jquery-plugins.js",
   "scripts": {

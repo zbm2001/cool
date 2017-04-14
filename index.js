@@ -353,27 +353,28 @@ function iiancestorAll(elem, selector, root) {
  * @param  {Function} presetOptions 预设的参数处理函数，参数会被传入
  * @return {Object} 返回jquery的类Promise对象
  */
-function presetAjax($, preOptions, preHandleEvents, presetOptions) {
+function presetAjax ($, preOptions, preHandleEvents, presetOptions) {
 
   preOptions = $.extend(true, {}, preOptions);
   preHandleEvents = $.extend({}, preHandleEvents);
 
-  return function ajax(options) {
+  return function ajax (options) {
 
     var newOptions = $.extend({}, preOptions, options),
         $ajax,
         $ajaxThen,
         results = {};
+        cloneOptions = $.extend(true, {}, options);
 
     presetOptions && presetOptions(newOptions);
 
-    ['success', 'beforeSend', 'error', 'complete'].forEach(function(name) {
+    ['success', 'beforeSend', 'error', 'complete'].forEach(function (name) {
       newOptions[name] = this(name, preHandleEvents[name], options[name]);
-    }, function(name, preHandleEvent, handleEvent) {
-      return function() {
+    }, function (name, preHandleEvent, handleEvent) {
+      return function () {
         var result;
         if (preHandleEvent) {
-          result = results[name] = preHandleEvent.apply(this, Array.prototype.slice.call(arguments).concat(options));
+          result = results[name] = preHandleEvent.apply(this, Array.prototype.slice.call(arguments).concat(cloneOptions));
         }
         if (handleEvent && result !== false && !(result && typeof result.then === 'function')) {
           return handleEvent.apply(this, arguments)
@@ -390,7 +391,7 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
 
     // 异步请求
     // 这里是为解决某些虽然请求success，但可能业务失败的预处理场景
-    $ajaxThen = $ajax.then(function(res) {
+    $ajaxThen = $ajax.then(function (res) {
       var result = results.success;
       // 后只覆盖属性（此时$ajax属性已变更）
       extendBind($ajaxThen, $ajax, true);
@@ -407,14 +408,14 @@ function presetAjax($, preOptions, preHandleEvents, presetOptions) {
     // 让return出的对象保持某些原方法可用（如：abort）
     // 将原 jQuery ajax 对象的绑定方法和属性，附加到then出的目标对象上
     // 被附加的绑定方法执行时，scope依然为原对象
-    function extendBind(target, source, nofn) {
-      $.each(source, function(k, v) {
+    function extendBind (target, source, nofn) {
+      $.each(source, function (k, v) {
         if (nofn || !(k in target)) {
           if (typeof v !== 'function') {
             target[k] = v;
           } else if (!nofn) {
-            target[k] = function(v) {
-              return function() {
+            target[k] = function (v) {
+              return function () {
                 v.apply(source, arguments);
               }
             }(v);
